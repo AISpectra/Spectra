@@ -18,6 +18,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+
 # Configuración de la sesión
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"  # Se almacenará en archivos temporales
@@ -349,4 +350,4 @@ with app.app_context():
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
