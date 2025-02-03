@@ -220,6 +220,10 @@ def login():
             
             login_user(user)
 
+            # Verificar si el usuario ha aceptado la política de privacidad
+            if not user.privacy_accepted:
+                return redirect(url_for('privacy'))  # Redirigir a la página de aceptación de la política
+
             # Si el usuario no tiene un plan guardado, enviarlo a suscripción
             if not user.subscription or user.subscription == "free":
                 return redirect(url_for('suscripcion'))
