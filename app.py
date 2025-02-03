@@ -10,6 +10,7 @@ import openai
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
@@ -22,6 +23,10 @@ CORS(app)
 # Configuración de la sesión
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"  # Se almacenará en archivos temporales
+# app.config['SESSION_COOKIE_SECURE'] = True  # Solo en HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Evita acceso por JavaScript
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Reduce riesgo CSRF
+
 Session(app)
 
 import logging
@@ -61,12 +66,22 @@ short_term_memory = {}
 # Modelo de usuario
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)  # Nombre de usuario único
-    email = db.Column(db.String(150), unique=True, nullable=False)  # Correo único
-    password = db.Column(db.String(150), nullable=False)
-    is_verified = db.Column(db.Boolean, default=False)  # Verificación de correo
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)  # Aumentamos longitud por seguridad
+    is_verified = db.Column(db.Boolean, default=False)
     privacy_accepted = db.Column(db.Boolean, default=False)
+    show_accept = db.Column(db.Boolean, default=True)
     subscription = db.Column(db.String(10), default="free")
+
+
+    # Métodos para manejar contraseñas
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 
 # Cargar usuario para Flask-Login
 @login_manager.user_loader
@@ -109,7 +124,9 @@ def register():
                 return redirect(url_for('login'))
         else:
             # Registrar un nuevo usuario
-            new_user = User(username=username, email=email, password=password)  # Hash la contraseña para producción
+            new_user = User(username=username, email=email)
+            new_user.set_password(password)  # Guardar contraseña encriptada
+
             db.session.add(new_user)
             db.session.commit()
 
@@ -172,6 +189,11 @@ def reset_password(token):
         flash('El enlace de recuperación ha caducado.', 'danger')
         return redirect(url_for('forgot_password'))  # Redirige a la página de solicitud de recuperación
 
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash('No se pudo encontrar un usuario con ese correo electrónico.', 'danger')
+        return redirect(url_for('forgot_password'))
+
     if request.method == 'POST':
         new_password = request.form['new_password']
         confirm_password = request.form['confirm_new_password']
@@ -183,8 +205,7 @@ def reset_password(token):
             return render_template('reset_password.html', token=token)
 
         if user:
-            # Si no quieres encriptar la contraseña, simplemente actualiza el campo sin encriptar
-            user.password = new_password  # No encriptamos la contraseña en este caso
+            user.set_password(new_password)  # Usa la función segura
             db.session.commit()  # Guardar los cambios
             flash('Tu contraseña ha sido actualizada exitosamente.', 'success')
             return redirect(url_for('login'))  # Redirigir a la página de login después de la actualización
@@ -210,6 +231,7 @@ def select_subscription():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    
     if request.method == 'POST':
         identifier = request.form['identifier']  # Puede ser username o email
         password = request.form['password']
@@ -217,7 +239,25 @@ def login():
         # Buscar por username o email
         user = User.query.filter((User.username == identifier) | (User.email == identifier)).first()
         
-        if user and user.password == password:  # Para producción, usa un hash seguro
+        # Verificar si el usuario existe antes de continuar
+        if not user:
+            flash("Usuario no encontrado", "danger")
+            return redirect(url_for('login'))
+	
+        # Verificar si hay cuentas duplicadas por email
+        duplicate_users = User.query.filter_by(email=identifier).all()
+        if len(duplicate_users) > 1:
+            # Mantener el usuario más antiguo y eliminar los demás
+            duplicate_users.sort(key=lambda u: u.id)  # Ordenar por ID (el más antiguo primero)
+            user = duplicate_users[0]  # Mantener el más antiguo
+            
+            for duplicate in duplicate_users[1:]:  # Eliminar los duplicados
+                db.session.delete(duplicate)
+            db.session.commit()
+            flash("Se han eliminado cuentas duplicadas automáticamente.", "info")
+
+
+        if user and user.check_password(password):
             if not user.is_verified:
                 flash("Debes confirmar tu correo antes de iniciar sesión.", "danger")
                 return redirect(url_for('login'))
@@ -252,18 +292,21 @@ def index():
 @app.route('/privacy')
 @login_required
 def privacy():
-    return render_template('privacy.html')
+    # return render_template('privacy.html')
+    return render_template('privacy.html', show_accept=current_user.show_accept)
 
 @app.route('/accept_privacy', methods=['POST'])
 @login_required
 def accept_privacy():
     current_user.privacy_accepted = True
+    current_user.show_accept = False
     db.session.commit()
     flash("Has aceptado la política de privacidad", "success")
-    return redirect(url_for('index'))
-    return render_template('privacy.html', show_accept=not current_user.privacy_accepted)
+    return redirect(url_for('suscripcion'))
+    # return render_template('suscription.html', show_accept=not current_user.privacy_accepted)
 
 @app.route('/suscripcion', methods=['GET', 'POST'])
+@login_required  # Proteger la vista
 def suscripcion():
     if request.method == 'POST':
         plan = request.form.get('plan')  # Obtener el plan seleccionado (free o premium)
