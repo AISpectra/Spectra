@@ -103,6 +103,10 @@ def register():
 
                 flash("Este correo ya está registrado. Hemos reenviado el correo de confirmación.", "info")
                 return redirect(url_for('login'))
+
+            else:
+                flash("Este correo ya está registrado y verificado. Puedes iniciar sesión.", "info")
+                return redirect(url_for('login'))
         else:
             # Registrar un nuevo usuario
             new_user = User(username=username, email=email, password=password)  # Hash la contraseña para producción
