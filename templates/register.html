@@ -148,18 +148,6 @@
         <h2>Chat Emocional</h2>
     </div>
 
-    <!-- Mensajes flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div>
-                {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
 
     <!-- Formulario de registro dentro del recuadro -->
     <div class="container">
@@ -176,6 +164,18 @@
             
             <input type="submit" value="Registrarse">
         </form>
+            <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div>
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
         <p>¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a></p>
     </div>
 </body>

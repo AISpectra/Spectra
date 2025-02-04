@@ -10,6 +10,32 @@
             padding: 0;
             box-sizing: border-box;
         }
+        /* Estilo para los mensajes flash */
+        .flash-message {
+            margin: 15px auto;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .flash-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .flash-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .flash-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
 
         body {
             font-family: 'Arial', sans-serif;
@@ -124,6 +150,40 @@
             background-color: #0056b3;
         }
 
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-container input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            padding-right: 40px;
+        }
+
+        .toggle-password {
+                position: absolute;
+                right: 10px; /* Mantiene el botón a la derecha */
+                top: -15%; /* Lo coloca a la mitad del input */
+                # transform: translateY(-50%); /* Centra el botón verticalmente */
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 1.2rem;
+                color: #007bff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%; /* Ajusta la altura para que coincida con el input */
+        }
+
+
         .forgot-password {
             text-align: center;
             margin-top: 10px;
@@ -145,6 +205,7 @@
     </style>
 </head>
 <body>
+           
     <div class="title-container">
         <h1>SPECTRA</h1>
         <h2>Chat Emocional</h2>
@@ -156,12 +217,28 @@
             <label for="identifier">Nombre de usuario o correo electrónico:</label>
             <input type="text" id="identifier" name="identifier" placeholder="Introduce tu usuario o correo" required>
             
-            <label for="password">Contraseña:</label>
-            <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" required>
             
+            <label for="password">Contraseña:</label>
+            <div class="password-container">
+                <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" required>
+                <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+            </div>
+
             <input type="submit" value="Iniciar sesión">
         </form>
-        
+                     <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div>
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
         <div class="forgot-password">
             <p><a href="{{ url_for('forgot_password') }}">¿Olvidaste tu contraseña?</a></p>
         </div>
@@ -173,5 +250,15 @@
             <!-- Si tienes un endpoint para el inicio, usa la URL adecuada -->
         </div>
     </div>
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+            } else {
+                passwordInput.type = "password";
+            }
+        }
+    </script>
 </body>
 </html>
