@@ -131,6 +131,30 @@
         #chat-form button:hover {
             background-color: #0056b3;
         }
+        
+        
+        .button-container {
+            display: flex;
+            gap: 10px; /* Espacio entre los botones */
+            justify-content: center; /* Centra los botones */
+            width: 100%;
+            max-width: 800px; /* Limitar el ancho máximo para que se vean bien */
+            margin-top: 20px; /* Espacio adicional entre el campo de texto y los botones */
+        }
+
+        .button-container button {
+           padding: 10px 20px;
+           font-size: 16px;
+           background-color: #007bff; 
+           color: white;
+           border: none;
+           border-radius: 5px;
+           cursor: pointer;
+        }
+
+        .button-container button:hover {
+           background-color: #0056b3; /* Efecto hover para los botones */
+        }
 
         /* Estilo para el desplegable */
         .dropdown {
@@ -203,14 +227,17 @@
     <!-- Formulario para enviar mensajes -->
     <form id="chat-form">
         <input type="text" id="user-input" placeholder="Escribe tu mensaje..." required>
+        <button type="submit">Enviar</button>
+    </form>
+    <div class="button-container">
         <button id="toggle-continuous">🔄</button>
         <!-- Este botón activará y desactivará el micrófono -->
         <button id="micButton" onclick="startSpeechRecognition()">🎤</button>
         <button type="button" id="toggle-voice" style="background: none; border: none; font-size: 24px; cursor: pointer;">
           🔊
         </button>
-        <button type="submit">Enviar</button>
-    </form>
+    </div>
+    
 
     <script>
         let voiceEnabled = true; // Estado inicial: voz activada
