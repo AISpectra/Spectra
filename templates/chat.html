@@ -378,7 +378,15 @@
         let finalTranscript = ""; // Almacenar el texto final reconocido
 
         function startSpeechRecognition() {
-           if (!continuousConversation && micEnabled) return; 
+           // if (!continuousConversation && micEnabled) return; 
+           
+           // Si el micrófono ya está encendido y no hemos detectado voz, lo apagamos
+           if (micEnabled && finalTranscript.trim() === "") {
+              micEnabled = false;
+              recognition.stop(); // Apagar el micrófono
+              document.getElementById("micButton").textContent = "🎤"; // Volver al icono de micrófono
+              return; // Salir de la función para evitar continuar con la grabación
+           }
 
            if (!micEnabled) {
               micEnabled = true;
