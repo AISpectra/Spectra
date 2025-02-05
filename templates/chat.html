@@ -203,41 +203,214 @@
     <!-- Formulario para enviar mensajes -->
     <form id="chat-form">
         <input type="text" id="user-input" placeholder="Escribe tu mensaje..." required>
+        <button id="toggle-continuous">🔄</button>
+        <!-- Este botón activará y desactivará el micrófono -->
+        <button id="micButton" onclick="startSpeechRecognition()">🎤</button>
+        <button type="button" id="toggle-voice" style="background: none; border: none; font-size: 24px; cursor: pointer;">
+          🔊
+        </button>
         <button type="submit">Enviar</button>
     </form>
 
     <script>
-        // Función para enviar el mensaje del usuario
-        document.getElementById("chat-form").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const userMessage = document.getElementById("user-input").value;
-            const chatBox = document.getElementById("chat-box");
+        let voiceEnabled = true; // Estado inicial: voz activada
+        // Variable global para almacenar las voces
+        let voices = [];
 
-            // Mostrar mensaje del usuario en el chat
-            chatBox.innerHTML += `<div class="user-msg">Tú: ${userMessage}</div>`;
-            document.getElementById("user-input").value = "";
+        function speakText(text) {
+           if (!voiceEnabled) return; // Si la voz está desactivada, no habla
+           
+           speechSynthesis.cancel(); // Detiene cualquier voz en curso antes de empezar
+           
+           // Dividir el texto por los signos de puntuación (., ?, !)
+           const sentences = text.split(/([.?!])/).filter(Boolean); // Dividir y mantener los signos de puntuación
+           let sentenceIndex = 0;
 
-            // Enviar el mensaje al servidor (para que el bot responda)
-            fetch('/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ message: userMessage })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.response) {
-                    chatBox.innerHTML += `<div class="bot-msg"><b>Spectra:</b> ${data.response}</div>`;
-                    chatBox.scrollTop = chatBox.scrollHeight;  // Desplazar el chat hacia abajo
-                } else {
-                    chatBox.innerHTML += `<div class="bot-msg"><b>Spectra:</b> Hubo un problema al procesar tu mensaje.</div>`;
+           function speakNextSentence() {
+              if (sentenceIndex < sentences.length) {
+                let sentence = sentences[sentenceIndex].trim(); // Eliminar posibles espacios adicionales
+
+                if (sentenceIndex + 1 < sentences.length) {
+                   // Asegurarnos de que los signos de puntuación queden al final de la frase
+                   sentence += sentences[sentenceIndex + 1].trim();
+                   sentenceIndex++; // Pasar al siguiente fragmento
                 }
-            })
-            .catch(error => {
-                chatBox.innerHTML += `<div class="bot-msg"><b>Spectra:</b> Error al enviar el mensaje.</div>`;
-            });
+
+                const speech = new SpeechSynthesisUtterance(sentence);
+                speech.lang = 'es-ES'; // Español
+         
+                // Si las voces ya están cargadas, usarlas
+                if (voices.length > 0) {
+                    const femaleVoices = voices.filter(voice => voice.lang === "es-ES" && (voice.name.includes("Google")));
+                    const googleVoice = voices.find(voice => voice.name === "Google español");
+                    // const preferredVoice = voices.find(voice => voice.name.includes("Google") && voice.lang === "es-ES");
+                    speech.voice = femaleVoices[0] || voices.find(voice => voice.lang === "es-ES"); // Si no hay voz femenina, usar la primera voz en español
+                    // Imprimir el nombre de la voz que está siendo utilizada
+                    console.log("Voz seleccionada:", speech.voice.name);
+                    // if (preferredVoice) {
+                        // speech.voice = preferredVoice;
+                        // speech.voice = googleVoice || femaleVoices[0] || voices.find(voice => voice.lang === "es-ES");
+                    // }
+                }
+
+                speech.rate = 1.0; // Un poco más pausado
+                speech.pitch = 1.2; // Un poco más cálido
+                speechSynthesis.speak(speech);
+
+                sentenceIndex++; // Incrementar el índice para el siguiente fragmento
+                // Asegurarnos de que se llame a la siguiente parte cuando termine
+                speech.onend = function() {
+                  speakNextSentence();
+    
+                  if (continuousConversation && sentenceIndex >= sentences.length) {
+                     setTimeout(() => {
+                       if (!speechSynthesis.speaking) {  // Esperar a que realmente termine
+                          startSpeechRecognition();
+                       }
+                     }, 2000); // Aseguramos una pausa antes de activar el micrófono
+                  }
+                };
+
+              }
+           }
+
+           // Comenzamos con la primera frase
+           speakNextSentence();
+           
+        }
+
+        // Asegurarnos de cargar las voces antes de usarlas
+        speechSynthesis.onvoiceschanged = function() {
+                voices = speechSynthesis.getVoices(); // Obtener las voces disponibles
+                if (voices.length > 0) {
+                   speakText(""); // Esto fuerza la carga de voces en algunos navegadores
+                }
+        };
+
+
+
+        document.getElementById("chat-form").addEventListener("submit", function(event) {
+           event.preventDefault();
+           const userMessage = document.getElementById("user-input").value;
+           const chatBox = document.getElementById("chat-box");
+
+           // Mostrar mensaje del usuario en el chat
+           chatBox.innerHTML += `<div class="user-msg">Tú: ${userMessage}</div>`;
+           document.getElementById("user-input").value = "";
+           
+           const typingIndicator = document.createElement("div");
+           typingIndicator.textContent = "Spectra está escribiendo...";
+           typingIndicator.style.fontStyle = "italic";
+           typingIndicator.style.color = "#777";
+           chatBox.appendChild(typingIndicator);
+           chatBox.scrollTop = chatBox.scrollHeight;
+
+
+        // Enviar el mensaje al servidor (para que el bot responda)
+           fetch('/chat', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: userMessage })
+           })
+           .then(response => response.json())
+           .then(data => {
+               if (data.response) {
+                  chatBox.removeChild(typingIndicator);
+                  const botResponse = `<div class="bot-msg"><b>Spectra:</b> ${data.response}</div>`;
+                  chatBox.innerHTML += botResponse;
+                  chatBox.scrollTop = chatBox.scrollHeight;  // Desplazar el chat hacia abajo
+
+                  // Reproducir la respuesta del bot en voz alta
+                  speakText(data.response);
+               } else {
+                  chatBox.innerHTML += `<div class="bot-msg"><b>Spectra:</b> Hubo un problema al procesar tu mensaje.</div>`;
+               }
+           })
+           .catch(error => {
+               chatBox.innerHTML += `<div class="bot-msg"><b>Spectra:</b> Error al enviar el mensaje.</div>`;
+           });
         });
+        document.getElementById("toggle-voice").addEventListener("click", function() {
+          voiceEnabled = !voiceEnabled; // Alternar entre activado/desactivado
+          this.textContent = voiceEnabled ? "🔊" : "🔇"; // Cambiar el icono del botón
+        });
+        
+        
+        document.getElementById("toggle-continuous").addEventListener("click", function() {
+            continuousConversation = !continuousConversation; // Alternar estado
+            this.textContent = continuousConversation ? "🔄 ON" : "🔄 OFF"; // Cambiar el texto del botón
+        });
+
+
+
+        let micEnabled = false; 
+        let recognition;
+        let silenceTimer;
+        let finalTranscript = ""; // Almacenar el texto final reconocido
+
+        function startSpeechRecognition() {
+           if (!continuousConversation && micEnabled) return; 
+
+           if (!micEnabled) {
+              micEnabled = true;
+              document.getElementById("micButton").textContent = "🛑"; 
+
+              if (!('webkitSpeechRecognition' in window)) {
+                  alert("Tu navegador no soporta esta funcionalidad.");
+                  return;
+              }
+
+              recognition = new webkitSpeechRecognition();
+              recognition.lang = 'es-ES'; 
+              recognition.continuous = true;  // ✅ Permite hablar sin detenerse
+              recognition.interimResults = true; 
+              recognition.autoPunctuation = true;
+
+              recognition.onresult = function(event) {
+                 let interimTranscript = "";
+
+                 for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                       finalTranscript += event.results[i][0].transcript + " ";  
+                    } else {
+                       interimTranscript += event.results[i][0].transcript;
+                    }
+                 }
+
+                 document.getElementById("user-input").value = finalTranscript + interimTranscript;
+
+                 // Reiniciar el temporizador cada vez que detecta voz
+                 clearTimeout(silenceTimer);
+                 silenceTimer = setTimeout(() => {
+                    if (finalTranscript.trim() !== "") { 
+                       sendTextMessage(finalTranscript.trim()); 
+                       finalTranscript = "";  
+                    }
+                    recognition.stop(); // ✅ Apagar el micrófono solo si hay silencio de 2.5s
+                    micEnabled = false;
+                    document.getElementById("micButton").textContent = "🎤"; 
+                 }, 2500);
+              };
+
+              recognition.start();
+           } else {
+              micEnabled = false;
+             document.getElementById("micButton").textContent = "🎤"; 
+             recognition.stop();
+           }
+        }
+
+
+    // Función para enviar el mensaje (puedes modificarla según tu implementación)
+    function sendTextMessage(text) {
+          document.getElementById("user-input").value = text; // Insertar el texto en el input
+          document.getElementById("chat-form").dispatchEvent(new Event("submit")); // Enviar formulario
+
+    }
+    let continuousConversation = false; // Modo apagado por defecto
+    
     </script>
 
 </body>
