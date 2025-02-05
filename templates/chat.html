@@ -244,7 +244,7 @@
                     const femaleVoices = voices.filter(voice => voice.lang === "es-ES" && (voice.name.includes("Google")));
                     const googleVoice = voices.find(voice => voice.name === "Google español");
                     // const preferredVoice = voices.find(voice => voice.name.includes("Google") && voice.lang === "es-ES");
-                    speech.voice = femaleVoices[0] || voices.find(voice => voice.lang === "es-ES"); // Si no hay voz femenina, usar la primera voz en español
+                    speech.voice = femaleVoices[0] || googleVoice || voices.find(voice => voice.lang === "es-ES") || voices[0]; // Fallback final a la primera voz disponible
                     // Imprimir el nombre de la voz que está siendo utilizada
                     console.log("Voz seleccionada:", speech.voice.name);
                     // if (preferredVoice) {
