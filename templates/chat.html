@@ -227,21 +227,23 @@
     <!-- Formulario para enviar mensajes -->
     <form id="chat-form">
         <input type="text" id="user-input" placeholder="Escribe tu mensaje..." required>
-        <button type="submit">Enviar</button>
+        <button type="submit"id="sendButton">Enviar</button>
     </form>
     <div class="button-container">
         <button id="toggle-continuous">🔄</button>
         <!-- Este botón activará y desactivará el micrófono -->
-        <button id="micButton" onclick="startSpeechRecognition()">🎤</button>
-        <button id="read-last-message">🗣️ Leer último</button>
+        <button id="micButton" onclick="startSpeechRecognition()"style="background: none; border: none; font-size: 24px; cursor: pointer;">🎤</button>
         <button type="button" id="toggle-voice" style="background: none; border: none; font-size: 24px; cursor: pointer;">
-          🔊
+          🔇
         </button>
     </div>
     
 
     <script>
-        let voiceEnabled = true; // Estado inicial: voz activada
+        
+
+
+        let voiceEnabled = false; // Estado inicial: voz activada
         // Variable global para almacenar las voces
         let voices = [];
 
@@ -318,6 +320,11 @@
 
 
         document.getElementById("chat-form").addEventListener("submit", function(event) {
+           if (micEnabled) {
+              event.preventDefault(); // Evita que se envíe mientras el micrófono está activo
+              console.log("No se puede enviar mientras hablas");
+              return;
+           }
            event.preventDefault();
            const userMessage = document.getElementById("user-input").value;
            const chatBox = document.getElementById("chat-box");
@@ -363,6 +370,9 @@
         document.getElementById("toggle-voice").addEventListener("click", function() {
           voiceEnabled = !voiceEnabled; // Alternar entre activado/desactivado
           this.textContent = voiceEnabled ? "🔊" : "🔇"; // Cambiar el icono del botón
+          if (!voiceEnabled) {
+             speechSynthesis.cancel(); // Detener cualquier voz en curso inmediatamente
+          }
         });
         
         
@@ -372,7 +382,7 @@
         });
 
 
-
+        const micButton = document.getElementById('micButton');
         let micEnabled = false; 
         let recognition;
         let silenceTimer;
@@ -424,10 +434,12 @@
                        sendTextMessage(finalTranscript.trim()); 
                        finalTranscript = "";  
                     }
-                    recognition.stop(); // ✅ Apagar el micrófono solo si hay silencio de 2.5s
-                    micEnabled = false;
-                    document.getElementById("micButton").textContent = "🎤"; 
-                 }, 2500);
+                    setTimeout(() => {
+                       recognition.stop(); // ✅ Apagar el micrófono solo si hay silencio de 2.5s
+                       micEnabled = false;
+                       document.getElementById("micButton").textContent = "🎤"; 
+                    }, 500);
+                 }, 2000);
               };
 
               recognition.start();
@@ -436,21 +448,31 @@
              document.getElementById("micButton").textContent = "🎤"; 
              recognition.stop();
            }
+
+           
         }
 
 
     // Función para enviar el mensaje (puedes modificarla según tu implementación)
     function sendTextMessage(text) {
-          document.getElementById("user-input").value = text; // Insertar el texto en el input
-          document.getElementById("chat-form").dispatchEvent(new Event("submit")); // Enviar formulario
+       micEnabled = false; // Apagar el micrófono antes de enviar
+       document.getElementById("micButton").textContent = "🎤"; 
+       const inputField = document.getElementById("user-input");
+       const form = document.getElementById("chat-form");
 
+       inputField.value = text; // Insertar el texto en el campo de entrada
+
+       setTimeout(() => {
+          form.requestSubmit(); // Enviar formulario de manera más confiable
+       }, 100); // Pequeña pausa para asegurar que el texto se refleje antes del envío
     }
+
     let continuousConversation = false; // Modo apagado por defecto
     
 
 
     
-    document.getElementById("read-last-message").addEventListener("click", function() {
+    document.getElementById("toggle-voice").addEventListener("click", function() {
         const botMessages = document.querySelectorAll(".bot-msg"); // Obtener todos los mensajes de Spectra
         if (botMessages.length > 0) {
            const lastMessage = botMessages[botMessages.length - 1].innerText.replace("Spectra:", "").trim();
