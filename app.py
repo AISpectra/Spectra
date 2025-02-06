@@ -37,7 +37,7 @@ mail_handler.setLevel(logging.DEBUG)
 app.logger.addHandler(mail_handler)
 
 app.secret_key = os.getenv("SECRET_KEY", "1999")  # Cambia esto por una clave secreta real
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")  # Utiliza la variable de entorno DATABASE_URL
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configuración de Flask-Mail usando variables de entorno
