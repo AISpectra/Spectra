@@ -233,6 +233,7 @@
         <button id="toggle-continuous">🔄</button>
         <!-- Este botón activará y desactivará el micrófono -->
         <button id="micButton" onclick="startSpeechRecognition()">🎤</button>
+        <button id="read-last-message">🗣️ Leer último</button>
         <button type="button" id="toggle-voice" style="background: none; border: none; font-size: 24px; cursor: pointer;">
           🔊
         </button>
@@ -446,6 +447,19 @@
     }
     let continuousConversation = false; // Modo apagado por defecto
     
+
+
+    
+    document.getElementById("read-last-message").addEventListener("click", function() {
+        const botMessages = document.querySelectorAll(".bot-msg"); // Obtener todos los mensajes de Spectra
+        if (botMessages.length > 0) {
+           const lastMessage = botMessages[botMessages.length - 1].innerText.replace("Spectra:", "").trim();
+           speakText(lastMessage); // Leer en voz alta el último mensaje
+        } else {
+           alert("No hay mensajes de Spectra para leer.");
+        }
+    });
+
     </script>
 
 </body>
