@@ -331,6 +331,11 @@
            }
            const utterance = new SpeechSynthesisUtterance(text);
            utterance.lang = selectedLanguage; // Establece el idioma seleccionado
+           // Asegurar que la voz se active solo después de interacción del usuario
+           document.addEventListener("click", function once() {
+              speechSynthesis.speak(utterance);
+              document.removeEventListener("click", once); // Eliminar el listener después de activarlo una vez
+           });
            
            speechSynthesis.cancel(); // Detiene cualquier voz en curso antes de empezar
            
