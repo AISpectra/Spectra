@@ -192,6 +192,19 @@
               margin-top: 50px; /* Aumenta el margen superior para separarlo del menú */
            }
         }
+        #language-selector {
+           font-size: 16px;
+           padding: 8px;
+           border-radius: 4px;
+           cursor: pointer;
+           appearance: none; /* Elimina el estilo por defecto del navegador */
+           background-color: #fff;
+           border: 1px solid #ccc;
+        }
+
+        #language-selector option {
+           padding: 10px;
+        }
 
     </style>
 </head>
@@ -236,19 +249,62 @@
         <button type="button" id="toggle-voice" style="background: none; border: none; font-size: 24px; cursor: pointer;">
           🔇
         </button>
+        <select id="language-selector">
+          <option value="es" data-flag="🇪🇸">Español</option>
+          <option value="en" data-flag="🇬🇧">English</option>
+          <option value="fr" data-flag="🇫🇷">Français</option>
+          <option value="de" data-flag="🇩🇪">Deutsch</option>
+          <option value="it" data-flag="🇮🇹">Italiano</option>
+        </select>
+
     </div>
     
 
     <script>
-        
+        let selectedLanguage = "es"; // Idioma por defecto
+        function setLanguage(lang) {
+           selectedLanguage = lang; // Cambia el idioma
+           console.log("Idioma cambiado a:", selectedLanguage);
+        }
+        // Añadir evento para detectar cuando se cambia el idioma
+        document.getElementById("language-selector").addEventListener("change", function() {
+           const selectedLang = this.value; // Obtener el idioma seleccionado
+           selectedLanguage = selectedLang; // Cambiar el idioma global
+
+           console.log("Idioma cambiado a:", selectedLanguage);
+           // Aquí puedes llamar a una función para actualizar la interfaz, como la voz, etc.
+           // Si quieres, también puedes agregar la bandera como texto o un ícono visual.
+           const selectedFlag = this.options[this.selectedIndex].getAttribute('data-flag');
+           console.log("Bandera seleccionada:", selectedFlag);
+
+           // Actualizar la interfaz con la bandera o mostrarla en algún lugar si lo prefieres.
+           document.getElementById("selected-flag").innerText = selectedFlag; // O cualquier otro lugar donde quieras mostrarla
+        });
+
 
 
         let voiceEnabled = false; // Estado inicial: voz activada
         // Variable global para almacenar las voces
         let voices = [];
+        
+        function loadVoices() {
+          voices = speechSynthesis.getVoices();
+          // Aquí puedes hacer cualquier acción una vez que las voces estén cargadas
+        }
+
+        speechSynthesis.onvoiceschanged = loadVoices;
+
 
         function speakText(text) {
            if (!voiceEnabled) return; // Si la voz está desactivada, no habla
+           
+           if (!voices.length) {
+              // Si las voces no están cargadas aún, esperamos
+              setTimeout(() => speakText(text), 100); // Intenta de nuevo después de 100 ms
+              return;
+           }
+           const utterance = new SpeechSynthesisUtterance(text);
+           utterance.lang = selectedLanguage; // Establece el idioma seleccionado
            
            speechSynthesis.cancel(); // Detiene cualquier voz en curso antes de empezar
            
@@ -267,20 +323,39 @@
                 }
 
                 const speech = new SpeechSynthesisUtterance(sentence);
-                speech.lang = 'es-ES'; // Español
+                // Definir el idioma de la voz
+                const langMap = {
+                        "es": "es-ES",
+                        "en": "en-US",
+                        "fr": "fr-FR",
+                        "de": "de-DE",
+                        "it": "it-IT"
+                };
+    
+                speech.lang = langMap[selectedLanguage] || "es-ES"; // 🔴 Usar selectedLanguage
          
                 // Si las voces ya están cargadas, usarlas
                 if (voices.length > 0) {
-                    const femaleVoices = voices.filter(voice => voice.lang === "es-ES" && (voice.name.includes("Google")));
-                    const googleVoice = voices.find(voice => voice.name === "Google español");
-                    // const preferredVoice = voices.find(voice => voice.name.includes("Google") && voice.lang === "es-ES");
-                    speech.voice = femaleVoices[0] || googleVoice || voices.find(voice => voice.lang === "es-ES") || voices[0]; // Fallback final a la primera voz disponible
+                    const availableVoices = voices.filter(voice => voice.lang === speech.lang);
+                    
+
+                    // const voices = speechSynthesis.getVoices();
+
+                    // Si el idioma es español, usar la voz de Google
+                    if (selectedLanguage === 'es') {
+                        const googleVoice = voices.find(voice => 
+                           voice.name.includes("Google") && voice.lang.startsWith("es")
+                        );
+                        if (googleVoice) {
+                           speech.voice = googleVoice;
+                        }
+                    } else {
+                        const availableVoices = voices.filter(voice => voice.lang === speech.lang);
+                        speech.voice = availableVoices[0] || voices[0];
+                    }
                     // Imprimir el nombre de la voz que está siendo utilizada
                     console.log("Voz seleccionada:", speech.voice.name);
-                    // if (preferredVoice) {
-                        // speech.voice = preferredVoice;
-                        // speech.voice = googleVoice || femaleVoices[0] || voices.find(voice => voice.lang === "es-ES");
-                    // }
+                    
                 }
 
                 speech.rate = 1.0; // Un poco más pausado
@@ -357,6 +432,11 @@
                   chatBox.innerHTML += botResponse;
                   chatBox.scrollTop = chatBox.scrollHeight;  // Desplazar el chat hacia abajo
 
+                  // Cambiar idioma según la respuesta del servidor
+                  if (data.language) {
+                     selectedLanguage = data.language;
+                     console.log("Idioma detectado:", selectedLanguage);
+                  }
                   // Reproducir la respuesta del bot en voz alta
                   speakText(data.response);
                } else {
@@ -409,7 +489,16 @@
               }
 
               recognition = new webkitSpeechRecognition();
-              recognition.lang = 'es-ES'; 
+              // Usar el idioma detectado
+              const langMap = {
+                  "es": "es-ES",
+                  "en": "en-US",
+                  "fr": "fr-FR",
+                  "de": "de-DE",
+                  "it": "it-IT"
+              };
+        
+              recognition.lang = langMap[selectedLanguage] || "es-ES"; 
               recognition.continuous = true;  // ✅ Permite hablar sin detenerse
               recognition.interimResults = true; 
               recognition.autoPunctuation = true;
