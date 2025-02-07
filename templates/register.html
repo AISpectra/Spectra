@@ -75,7 +75,7 @@
             font-size: 1rem;
             border: 1px solid #ddd;
             border-radius: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             width: 100%;
             background-color: #f9f9f9;
         }
@@ -157,7 +157,7 @@
         .toggle-password {
             position: absolute;
             right: 10px; /* Mantiene el botón a la derecha */
-            top: 30%; /* Lo coloca a la mitad del input */
+            top: 40%; /* Lo coloca a la mitad del input */
             transform: translateY(-50%); /* Centra el botón verticalmente */
             background: none;
             border: none;
@@ -165,15 +165,38 @@
             font-size: 1.2rem;
             color: #007bff;
         }
-         /* Estilo para el aviso de contraseña segura */
-        .password-info {
-            font-size: 0.9rem;
-            color: #333;
-            margin-top: 5px;
+        /* Estilo para el aviso de contraseña segura */
+
+        .password-header {
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           margin-top: 0px;
         }
 
-        .password-info span {
-            font-weight: bold;
+        .password-status {
+           font-size: 1rem;
+           font-weight: bold;
+           color: #dc3545; /* Rojo por defecto (insegura) */
+        }
+
+        .password-status.secure {
+           color: #28a745; /* Verde cuando es segura */
+        }
+
+        .info-btn {
+           background: none;
+           border: none;
+           font-size: 1.2rem;
+           cursor: pointer;
+           color: #007bff;
+        }
+
+
+        .password-info {
+            font-size: 0.8rem;
+            color: #333;
+            margin: 10px 0 15px 0;
         }
 
         .password-info ul {
@@ -181,7 +204,7 @@
             padding-left: 20px;
         }
 
-        .password-info li {
+        .password-info li.valid {
             color: #28a745;
         }
 
@@ -214,7 +237,12 @@
                 <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
             </div>
             
-            <div class="password-info" id="password-info">
+            <div class="password-header">
+                <span id="password-status" class="password-status">Contraseña insegura</span>
+                <button type="button" class="info-btn" onclick="togglePasswordInfo()">ℹ️</button>
+            </div>
+
+            <div class="password-info" id="password-info" style="display: none;">
                 <ul>
                     <li id="min-length" class="invalid">Al menos 8 caracteres.</li>
                     <li id="uppercase" class="invalid">Debe contener al menos una letra mayúscula.</li>
@@ -223,7 +251,7 @@
                     <li id="special-char" class="invalid">Debe contener al menos un carácter especial (!, @, #, etc.).</li>
                 </ul>
             </div>
-            <input type="submit" value="Registrarse">
+            <input type="submit" id="submit-btn" value="Registrarse" disabled>
         </form>
 
         <!-- Mensajes flash -->
@@ -242,11 +270,13 @@
         <p>¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a></p>
     </div>
 
+
     <script>
+        
+
         function togglePassword() {
             const passwordInput = document.getElementById("password");
-            const toggleButton = document.querySelector(".toggle-password");
-
+            const toggleButton = document.querySelector(".toggle-password"); // Aquí seleccionamos el botón
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
                 toggleButton.textContent = "🙈";  // Cambiar a mono tapándose los ojos
@@ -255,65 +285,70 @@
                 toggleButton.textContent = "👁️";  // Volver al ojo
             }
         }
-        // Función para verificar los requisitos de la contraseña
-        const passwordInput = document.getElementById("password");
-        const submitBtn = document.getElementById("submit-btn");
+        function togglePasswordInfo() {
+                const info = document.getElementById("password-info");
+                info.style.display = info.style.display === "none" ? "block" : "none";
+        }
 
-        const minLength = document.getElementById("min-length");
-        const uppercase = document.getElementById("uppercase");
-        const lowercase = document.getElementById("lowercase");
-        const number = document.getElementById("number");
-        const specialChar = document.getElementById("special-char");
 
-        passwordInput.addEventListener("input", function() {
-            const password = passwordInput.value;
-            let isValid = true;
 
-            // Verificar los requisitos de la contraseña
-            if (password.length < 8) {
-                minLength.classList.remove("valid");
-                isValid = false;
-            } else {
-                minLength.classList.add("valid");
-            }
+      
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            const usernameInput = document.getElementById("username");
+            usernameInput.addEventListener("input", function () {
+                if (this.value.includes("@")) {
+                    this.value = this.value.replace(/@/g, ""); // Elimina @ en tiempo real
+                }
+            });
 
-            if (!/[A-Z]/.test(password)) {
-                uppercase.classList.remove("valid");
-                isValid = false;
-            } else {
-                uppercase.classList.add("valid");
-            }
+            const passwordInput = document.getElementById("password");
+            const submitBtn = document.getElementById("submit-btn");
+            const passwordStatus = document.getElementById("password-status");
+            const checks = {
+                minLength: document.getElementById("min-length"),
+                uppercase: document.getElementById("uppercase"),
+                lowercase: document.getElementById("lowercase"),
+                number: document.getElementById("number"),
+                specialChar: document.getElementById("special-char")
+            };
 
-            if (!/[a-z]/.test(password)) {
-                lowercase.classList.remove("valid");
-                isValid = false;
-            } else {
-                lowercase.classList.add("valid");
-            }
+            passwordInput.addEventListener("input", function() {
+                const password = passwordInput.value;
+                let isValid = true;
 
-            if (!/\d/.test(password)) {
-                number.classList.remove("valid");
-                isValid = false;
-            } else {
-                number.classList.add("valid");
-            }
+                function validate(check, condition) {
+                    if (condition) {
+                        check.classList.remove("invalid");
+                        check.classList.add("valid");
+                    } else {
+                        check.classList.remove("valid");
+                        check.classList.add("invalid");
+                        isValid = false;
+                    }
+                }
 
-            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-                specialChar.classList.remove("valid");
-                isValid = false;
-            } else {
-                specialChar.classList.add("valid");
-            }
+                validate(checks.minLength, password.length >= 8);
+                validate(checks.uppercase, /[A-Z]/.test(password));
+                validate(checks.lowercase, /[a-z]/.test(password));
+                validate(checks.number, /\d/.test(password));
+                validate(checks.specialChar, /[!@#$%^&*(),.?":{}|<>]/.test(password));
 
-            // Habilitar el botón de registro solo si todos los requisitos son válidos
-            if (isValid) {
-                submitBtn.classList.remove("disabled");
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.classList.add("disabled");
-                submitBtn.disabled = true;
-            }
+                if (isValid) {
+                    passwordStatus.textContent = "Contraseña segura";
+                    passwordStatus.classList.remove("insecure");
+                    passwordStatus.classList.add("secure");
+                } else {
+                    passwordStatus.textContent = "Contraseña insegura";
+                    passwordStatus.classList.remove("secure");
+                    passwordStatus.classList.add("insecure");
+                }
+
+                submitBtn.disabled = !isValid;
+            });
+
         });
     </script>
+
 </body>
 </html>
