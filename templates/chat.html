@@ -265,34 +265,11 @@
           <option value="de" data-flag="🇩🇪">Deutsch</option>
           <option value="it" data-flag="🇮🇹">Italiano</option>
         </select>
-        <button onclick="testSpeech()">Probar Voz</button>
 
     </div>
     
 
     <script>
-
-        function testSpeech() {
-             const utterance = new SpeechSynthesisUtterance("Hola, esto es una prueba de voz en iOS.");
-             utterance.lang = "es-ES"; // Configura el idioma de la voz
-
-             // Intenta seleccionar una voz específica si están disponibles
-             const voices = speechSynthesis.getVoices();
-             const googleVoice = voices.find(voice => voice.name.includes("Google") && voice.lang === "es-ES");
-    
-             if (googleVoice) {
-                utterance.voice = googleVoice;
-                console.log("Usando voz:", googleVoice.name);
-             } else {
-                console.log("Usando voz por defecto.");
-             }
-
-             speechSynthesis.speak(utterance);
-        }
-
-
-
-
 
 
 
