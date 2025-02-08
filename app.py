@@ -332,6 +332,11 @@ def suscripcion():
 def weekly():
     return render_template('weekly.html')  # Página semanal
 
+@app.route('/iphone-version')
+@login_required
+def iphone_version():
+    return render_template("iphone.html")  # Crea un archivo iphone.html
+
 @app.route('/chat', methods=['GET', 'POST'])
 @login_required
 def chat():
