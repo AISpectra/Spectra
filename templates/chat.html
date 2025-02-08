@@ -207,6 +207,15 @@
         }
 
     </style>
+    <script>
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+        window.location.href = "chatv2.html";
+    }
+
+    </script>
 </head>
 <body>
 
