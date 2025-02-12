@@ -2,8 +2,6 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_session import Session
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import openai
@@ -11,9 +9,18 @@ from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
+from supabase import create_client, Client
 
-# Cargar variables de entorno desde el archivo .env
-load_dotenv()
+# Cargar variables de entorno
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("Las credenciales de Supabase no están configuradas correctamente.")
+
+# Crear cliente de Supabase
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 # Configuración de Flask
 app = Flask(__name__)
@@ -37,8 +44,8 @@ mail_handler.setLevel(logging.DEBUG)
 app.logger.addHandler(mail_handler)
 
 app.secret_key = os.getenv("SECRET_KEY", "1999")  # Cambia esto por una clave secreta real
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configuración de Flask-Mail usando variables de entorno
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -52,9 +59,6 @@ app.config['MAIL_ASCII_ATTACHMENTS'] = False
 mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.secret_key)
 
-# Base de datos
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 # Flask-Login
 login_manager = LoginManager(app)
@@ -64,29 +68,66 @@ login_manager.login_view = "login"
 short_term_memory = {}
 
 # Modelo de usuario
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)  # Aumentamos longitud por seguridad
-    is_verified = db.Column(db.Boolean, default=False)
-    privacy_accepted = db.Column(db.Boolean, default=False)
-    show_accept = db.Column(db.Boolean, default=True)
-    subscription = db.Column(db.String(10), default="free")
+class User(UserMixin):
+     def __init__(self, id, username, email):
+        self.id = id
+        self.username = username
+        self.email = email
 
 
-    # Métodos para manejar contraseñas
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
 
 
 # Cargar usuario para Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    response = supabase.table("users").select("*").eq("id", user_id).execute()
+    user_data = response.data
+    if user_data and len(user_data) > 0:
+        return User(user_data[0]['id'], user_data[0]['username'], user_data[0]['email'])
+    return None
+
+
+# Función para registrar usuario en Supabase
+def register_user(username, email, password):
+    hashed_password = generate_password_hash(password)
+    try:
+        response = supabase.table("users").insert({
+            "username": username,
+            "email": email,
+            "password_hash": hashed_password,
+            "is_verified": False,
+            "privacy_accepted": False,
+            "show_accept": True,
+            "subscription": "free"
+        }).execute()
+        if response.status_code == 201:  # Verifica que la inserción fue exitosa
+            return response.data
+        return None
+    except Exception as e:
+        print(f"Error al registrar usuario: {e}")
+        return None
+
+
+# Función para autenticar usuario
+def authenticate_user(email, password):
+    response = supabase.table("users").select("*").eq("email", email).execute()
+    user_data = response.data
+    if user_data and len(user_data) > 0:
+        if check_password_hash(user_data[0]["password_hash"], password):
+           return User(user_data[0]["id"], user_data[0]["username"], user_data[0]["email"])
+    return None  # Retornar None si no hay coincidencia o la contraseña es incorrecta
+
+def get_user_by_email(email):
+    try:
+        response = supabase.table("users").select("*").eq("email", email).execute()
+        if response.status_code == 200:
+            return response.data
+        else:
+            return None
+    except Exception as e:
+        print(f"Error al consultar el usuario: {e}")
+        return None
+
 
 # Rutas
 
@@ -102,33 +143,47 @@ def register():
         password = request.form['password']
         
         # Verificar si el nombre de usuario ya está en uso
-        if User.query.filter_by(username=username).first():
-            flash("El nombre de usuario ya está en uso", "danger")
+        existing_user_by_username = supabase.table("users").select("*").eq("username", username).execute().data
+        if existing_user_by_username:
+             flash("El nombre de usuario ya está en uso", "danger")
+             return redirect(url_for('register'))
+
         # Verificar si el correo ya está registrado
-        elif User.query.filter_by(email=email).first():
-            existing_user = User.query.filter_by(email=email).first()
-            # Si el correo está registrado pero no verificado, reenviar el correo de confirmación
-            if not existing_user.is_verified:
-                # Enviar correo de verificación
-                token = serializer.dumps(email, salt="email-confirm")
-                confirm_url = url_for('confirm_email', token=token, _external=True)
-                msg = Message('Confirma tu correo electrónico', recipients=[email])
-                msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
-                mail.send(msg)
+        existing_user_by_email = supabase.table("users").select("*").eq("email", email).execute().data
+        if existing_user_by_email:
+             # Si el correo está registrado pero no verificado, reenviar el correo de confirmación
+             if not existing_user_by_email[0]["is_verified"]:
+                 # Enviar correo de verificación
+                 token = serializer.dumps(email, salt="email-confirm")
+                 confirm_url = url_for('confirm_email', token=token, _external=True)
+                 msg = Message('Confirma tu correo electrónico', recipients=[email])
+                 msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
+                 mail.send(msg)
 
                 flash("Este correo ya está registrado. Hemos reenviado el correo de confirmación.", "info")
                 return redirect(url_for('login'))
 
-            else:
-                flash("Este correo ya está registrado y verificado. Puedes iniciar sesión.", "info")
-                return redirect(url_for('login'))
+    else:
+        flash("Este correo ya está registrado y verificado. Puedes iniciar sesión.", "info")
+        return redirect(url_for('login'))
         else:
             # Registrar un nuevo usuario
-            new_user = User(username=username, email=email)
-            new_user.set_password(password)  # Guardar contraseña encriptada
+            hashed_password = generate_password_hash(password)
+            response = supabase.table("users").insert({
+              "username": username,
+              "email": email,
+              "password_hash": hashed_password,
+              "is_verified": False,
+              "privacy_accepted": False,
+              "show_accept": True,
+              "subscription": "free"
+            }).execute()
+            if response.data:
+               flash("Registro exitoso. Revisa tu correo para confirmar tu cuenta.", "success")
+            else:
+               flash("Hubo un problema al registrar tu cuenta.", "danger")
+               return redirect(url_for('register'))
 
-            db.session.add(new_user)
-            db.session.commit()
 
             # Enviar correo de verificación
             token = serializer.dumps(email, salt="email-confirm")
@@ -145,21 +200,36 @@ def register():
 def confirm_email(token):
     try:
         email = serializer.loads(token, salt="email-confirm", max_age=3600)  # 1 hora de validez
-        user = User.query.filter_by(email=email).first()
+        
+        # Obtener el usuario de Supabase
+        user = supabase.table("users").select("*").eq("email", email).execute().data
+
         if user:
-            user.is_verified = True
-            db.session.commit()
-            flash("¡Correo confirmado exitosamente! Ahora puedes iniciar sesión.", "success")
-            return redirect(url_for('login'))
+            # Actualizar el estado de verificación
+            response = supabase.table("users").update({"is_verified": True}).eq("email", email).execute()
+            
+            if response.status_code == 200:
+                flash("¡Correo confirmado exitosamente! Ahora puedes iniciar sesión.", "success")
+                return redirect(url_for('login'))
+            else:
+                flash("Hubo un problema al confirmar tu correo.", "danger")
+                return redirect(url_for('login'))
+        else:
+            flash("Usuario no encontrado.", "danger")
+            return redirect(url_for('register'))
+
     except SignatureExpired:
         flash("El enlace de confirmación ha expirado. Regístrate nuevamente.", "danger")
         return redirect(url_for('register'))
+
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
         email = request.form['email']
-        user = User.query.filter_by(email=email).first()
+
+        # Obtener el usuario de Supabase
+        user = supabase.table("users").select("*").eq("email", email).execute().data
 
         if user:
             # Generar token de recuperación
@@ -180,6 +250,7 @@ def forgot_password():
             flash('No encontramos una cuenta con ese correo electrónico.', 'danger')
     return render_template('forgot_password.html')
 
+
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
@@ -189,15 +260,16 @@ def reset_password(token):
         flash('El enlace de recuperación ha caducado.', 'danger')
         return redirect(url_for('forgot_password'))  # Redirige a la página de solicitud de recuperación
 
-    user = User.query.filter_by(email=email).first()
+    # Obtener el usuario desde Supabase
+    user = supabase.table("users").select("*").eq("email", email).execute().data
+
     if not user:
         flash('No se pudo encontrar un usuario con ese correo electrónico.', 'danger')
-        return redirect(url_for('forgot_password'))
+        return redirect(url_for('forgot_password'))  # Redirigir a la página de solicitud de recuperación
 
     if request.method == 'POST':
         new_password = request.form['new_password']
         confirm_password = request.form['confirm_new_password']
-        user = User.query.filter_by(email=email).first()
 
         # Verificar que las contraseñas coinciden
         if new_password != confirm_password:
@@ -205,14 +277,21 @@ def reset_password(token):
             return render_template('reset_password.html', token=token)
 
         if user:
-            user.set_password(new_password)  # Usa la función segura
-            db.session.commit()  # Guardar los cambios
-            flash('Tu contraseña ha sido actualizada exitosamente.', 'success')
-            return redirect(url_for('login'))  # Redirigir a la página de login después de la actualización
+            # Actualizar la contraseña en Supabase
+            hashed_password = generate_password_hash(new_password)
+            response = supabase.table("users").update({"password_hash": hashed_password}).eq("email", email).execute()
+
+            if response.data:
+                flash('Tu contraseña ha sido actualizada exitosamente.', 'success')
+                return redirect(url_for('login'))  # Redirigir a la página de login después de la actualización
+            else:
+                flash('Hubo un problema al actualizar tu contraseña.', 'danger')
+                return redirect(url_for('forgot_password'))  # Si no se pudo actualizar, redirigir a recuperar contraseña
         else:
             flash('No se pudo encontrar un usuario con ese correo electrónico.', 'danger')
     
     return render_template('reset_password.html', token=token)
+
 
 @app.route('/select_subscription', methods=['POST'])
 @login_required
@@ -223,11 +302,16 @@ def select_subscription():
         flash("Selección inválida.", "danger")
         return redirect(url_for('suscripcion'))
 
-    current_user.subscription = plan
-    db.session.commit()
+    # Actualizar el plan de suscripción en Supabase
+    response = supabase.table("users").update({
+        "subscription": plan
+    }).eq("email", current_user.email).execute()
 
-    return redirect(url_for('chat'))  # Lleva al usuario al chat después de elegir el plan
-
+    if response.data:
+        return redirect(url_for('chat'))  # Lleva al usuario al chat después de elegir el plan
+    else:
+        flash("Hubo un problema al cambiar el plan de suscripción.", "danger")
+        return redirect(url_for('suscripcion'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -237,7 +321,11 @@ def login():
         password = request.form['password']
         
         # Buscar por username o email
-        user = User.query.filter((User.username == identifier) | (User.email == identifier)).first()
+        user_data = supabase.table("users").select("*").eq("email", identifier).execute().data
+        if user_data and check_password_hash(user_data[0]["password_hash"], password):
+            user = User(user_data[0]["id"], user_data[0]["username"], user_data[0]["email"])
+            login_user(user)
+
         
         # Verificar si el usuario existe antes de continuar
         if not user:
@@ -245,16 +333,13 @@ def login():
             return redirect(url_for('login'))
 	
         # Verificar si hay cuentas duplicadas por email
-        duplicate_users = User.query.filter_by(email=identifier).all()
+        duplicate_users = supabase.table("users").select("*").eq("email", identifier).execute().data
         if len(duplicate_users) > 1:
-            # Mantener el usuario más antiguo y eliminar los demás
-            duplicate_users.sort(key=lambda u: u.id)  # Ordenar por ID (el más antiguo primero)
-            user = duplicate_users[0]  # Mantener el más antiguo
-            
-            for duplicate in duplicate_users[1:]:  # Eliminar los duplicados
-                db.session.delete(duplicate)
-            db.session.commit()
-            flash("Se han eliminado cuentas duplicadas automáticamente.", "info")
+           # Mantener el más antiguo y eliminar los duplicados
+           duplicate_users.sort(key=lambda u: u["id"])  # Ordenar por ID
+           for duplicate in duplicate_users[1:]:
+               supabase.table("users").delete().eq("id", duplicate["id"]).execute()
+
 
 
         if user and user.check_password(password):
@@ -298,12 +383,19 @@ def privacy():
 @app.route('/accept_privacy', methods=['POST'])
 @login_required
 def accept_privacy():
-    current_user.privacy_accepted = True
-    current_user.show_accept = False
-    db.session.commit()
-    flash("Has aceptado la política de privacidad", "success")
-    return redirect(url_for('suscripcion'))
-    # return render_template('suscription.html', show_accept=not current_user.privacy_accepted)
+    # Actualizar los valores de privacidad en Supabase
+    response = supabase.table("users").update({
+        "privacy_accepted": True,
+        "show_accept": False
+    }).eq("email", current_user.email).execute()
+
+    if response.data:
+        flash("Has aceptado la política de privacidad", "success")
+        return redirect(url_for('suscripcion'))
+    else:
+        flash("Hubo un problema al aceptar la política de privacidad", "danger")
+        return redirect(url_for('suscripcion'))
+
 
 @app.route('/suscripcion', methods=['GET', 'POST'])
 @login_required  # Proteger la vista
@@ -316,7 +408,12 @@ def suscripcion():
         elif plan == 'premium':
             current_user.subscription = 'premium'  # Guardamos el plan premium en la base de datos
         
-        db.session.commit()  # Confirmar los cambios en la base de datos
+        response = supabase.table("users").update({"subscription": plan}).eq("id", current_user.id).execute()
+        if response.status_code == 200:
+            flash("Suscripción actualizada.", "success")
+        else:
+            flash("Hubo un error al actualizar la suscripción.", "danger")
+
         
         # Redirigir al chat o al lugar correspondiente según el plan
         if plan == 'free':
@@ -398,9 +495,7 @@ def chat():
     # Si es un GET, mostrar la interfaz del chat
     return render_template('chat.html', subscription=current_user.subscription)
 
-# Configurar base de datos antes de la primera ejecución
-with app.app_context():
-    db.create_all()
+
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
 openai.api_key = os.getenv("OPENAI_API_KEY")
