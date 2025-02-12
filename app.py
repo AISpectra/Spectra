@@ -209,12 +209,12 @@ def confirm_email(token):
             # Actualizar el estado de verificación
             response = supabase.table("users").update({"is_verified": True}).eq("email", email).execute()
             
-            if response.status_code == 200:
-                flash("¡Correo confirmado exitosamente! Ahora puedes iniciar sesión.", "success")
-                return redirect(url_for('login'))
-            else:
+            if response.error:  # Verificar si hubo un error en la respuesta
                 flash("Hubo un problema al confirmar tu correo.", "danger")
                 return redirect(url_for('login'))
+
+            flash("¡Correo confirmado exitosamente! Ahora puedes iniciar sesión.", "success")
+            return redirect(url_for('login'))
         else:
             flash("Usuario no encontrado.", "danger")
             return redirect(url_for('register'))
@@ -316,52 +316,49 @@ def select_subscription():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    
     if request.method == 'POST':
         identifier = request.form['identifier']  # Puede ser username o email
         password = request.form['password']
         
         # Buscar por username o email
         user_data = supabase.table("users").select("*").eq("email", identifier).execute().data
-        if user_data and check_password_hash(user_data[0]["password_hash"], password):
-            user = User(user_data[0]["id"], user_data[0]["username"], user_data[0]["email"])
-            login_user(user)
 
-        
-        # Verificar si el usuario existe antes de continuar
-        if not user:
+        if not user_data:  # Si no hay datos, mostrar error
             flash("Usuario no encontrado", "danger")
             return redirect(url_for('login'))
-	
-        # Verificar si hay cuentas duplicadas por email
+        
+        user = user_data[0]  # Obtener el primer resultado de la consulta
+        
+        # Verificar la contraseña
+        if not check_password_hash(user["password_hash"], password):
+            flash("Contraseña incorrecta", "danger")
+            return redirect(url_for('login'))
+
+        # Verificar si el usuario está verificado
+        if not user["is_verified"]:
+            flash("Debes confirmar tu correo antes de iniciar sesión.", "danger")
+            return redirect(url_for('login'))
+
+        # Eliminar cuentas duplicadas por email
         duplicate_users = supabase.table("users").select("*").eq("email", identifier).execute().data
         if len(duplicate_users) > 1:
-           # Mantener el más antiguo y eliminar los duplicados
-           duplicate_users.sort(key=lambda u: u["id"])  # Ordenar por ID
-           for duplicate in duplicate_users[1:]:
-               supabase.table("users").delete().eq("id", duplicate["id"]).execute()
+            duplicate_users.sort(key=lambda u: u["id"])  # Ordenar por ID
+            for duplicate in duplicate_users[1:]:  # Mantener el primero y borrar los demás
+                supabase.table("users").delete().eq("id", duplicate["id"]).execute()
 
+        # Crear instancia de usuario
+        user_obj = User(user["id"], user["username"], user["email"])  # Asumo que User toma estos argumentos
+        login_user(user_obj)
 
+        # Verificar si ha aceptado la política de privacidad
+        if not user["privacy_accepted"]:
+            return redirect(url_for('privacy'))
 
-        if user and user.check_password(password):
-            if not user.is_verified:
-                flash("Debes confirmar tu correo antes de iniciar sesión.", "danger")
-                return redirect(url_for('login'))
-            
-            login_user(user)
-
-            # Verificar si el usuario ha aceptado la política de privacidad
-            if not user.privacy_accepted:
-                return redirect(url_for('privacy'))  # Redirigir a la página de aceptación de la política
-
-            # Si el usuario no tiene un plan guardado, enviarlo a suscripción
-            if not user.subscription or user.subscription == "free":
-                return redirect(url_for('suscripcion'))
-
-            # Si el usuario tiene el plan premium, enviarlo directamente al chat
+        # Redirigir según el plan de suscripción
+        if not user["subscription"] or user["subscription"] == "free":
+            return redirect(url_for('suscripcion'))
+        else:
             return redirect(url_for('chat'))
-        
-        flash("Nombre de usuario/correo o contraseña incorrectos", "danger")
 
     return render_template('login.html')
 
