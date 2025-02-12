@@ -69,10 +69,15 @@ short_term_memory = {}
 
 # Modelo de usuario
 class User(UserMixin):
-     def __init__(self, id, username, email):
+    def __init__(self, id, username, email, is_verified, privacy_accepted, show_accept, subscription):
         self.id = id
         self.username = username
         self.email = email
+        self.is_verified = is_verified
+        self.privacy_accepted = privacy_accepted
+        self.show_accept = show_accept
+        self.subscription = subscription
+
 
 
 
@@ -83,8 +88,18 @@ def load_user(user_id):
     response = supabase.table("users").select("*").eq("id", user_id).execute()
     user_data = response.data
     if user_data and len(user_data) > 0:
-        return User(user_data[0]['id'], user_data[0]['username'], user_data[0]['email'])
+        # Pasar todos los atributos al crear el objeto User
+        return User(
+            user_data[0]['id'],
+            user_data[0]['username'],
+            user_data[0]['email'],
+            user_data[0].get('is_verified', False),  # Usar .get() para evitar KeyError
+            user_data[0].get('privacy_accepted', False),
+            user_data[0].get('show_accept', False),
+            user_data[0].get('subscription', 'free')
+        )
     return None
+
 
 
 # Función para registrar usuario en Supabase
@@ -97,7 +112,7 @@ def register_user(username, email, password):
             "password_hash": hashed_password,
             "is_verified": False,
             "privacy_accepted": False,
-            "show_accept": True,
+            "show_accept": False,  # Definir como False por defecto
             "subscription": "free"
         }).execute()
         if response.status_code == 201:  # Verifica que la inserción fue exitosa
@@ -108,25 +123,29 @@ def register_user(username, email, password):
         return None
 
 
-# Función para autenticar usuario
-def authenticate_user(email, password):
-    response = supabase.table("users").select("*").eq("email", email).execute()
-    user_data = response.data
-    if user_data and len(user_data) > 0:
-        if check_password_hash(user_data[0]["password_hash"], password):
-           return User(user_data[0]["id"], user_data[0]["username"], user_data[0]["email"])
-    return None  # Retornar None si no hay coincidencia o la contraseña es incorrecta
 
+# Función para autenticar usuario
 def get_user_by_email(email):
     try:
         response = supabase.table("users").select("*").eq("email", email).execute()
-        if response.status_code == 200:
-            return response.data
+        if response.status_code == 200 and len(response.data) > 0:
+            user_data = response.data[0]
+            # Devuelve un objeto User con todos los atributos
+            return User(
+                user_data["id"],
+                user_data["username"],
+                user_data["email"],
+                user_data.get("is_verified", False),
+                user_data.get("privacy_accepted", False),
+                user_data.get("show_accept", False),
+                user_data.get("subscription", "free")
+            )
         else:
             return None
     except Exception as e:
         print(f"Error al consultar el usuario: {e}")
         return None
+
 
 
 # Rutas
