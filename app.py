@@ -366,7 +366,15 @@ def login():
                 supabase.table("users").delete().eq("id", duplicate["id"]).execute()
 
         # Crear instancia de usuario
-        user_obj = User(user["id"], user["username"], user["email"])  # Asumo que User toma estos argumentos
+        user_obj = User(
+            user["id"], 
+            user["username"], 
+            user["email"], 
+            user.get("is_verified", False), 
+            user.get("privacy_accepted", False), 
+            user.get("show_accept", False), 
+            user.get("subscription", "free")
+        )  # Asumo que User toma estos argumentos
         print(f"ID: {user['id']}, Username: {user['username']}, Email: {user['email']}")
         login_user(user_obj)
 
