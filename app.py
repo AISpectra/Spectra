@@ -145,55 +145,56 @@ def register():
         # Verificar si el nombre de usuario ya está en uso
         existing_user_by_username = supabase.table("users").select("*").eq("username", username).execute().data
         if existing_user_by_username:
-             flash("El nombre de usuario ya está en uso", "danger")
-             return redirect(url_for('register'))
+            flash("El nombre de usuario ya está en uso", "danger")
+            return redirect(url_for('register'))
 
         # Verificar si el correo ya está registrado
         existing_user_by_email = supabase.table("users").select("*").eq("email", email).execute().data
         if existing_user_by_email:
-             # Si el correo está registrado pero no verificado, reenviar el correo de confirmación
-             if not existing_user_by_email[0]["is_verified"]:
-                 # Enviar correo de verificación
-                 token = serializer.dumps(email, salt="email-confirm")
-                 confirm_url = url_for('confirm_email', token=token, _external=True)
-                 msg = Message('Confirma tu correo electrónico', recipients=[email])
-                 msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
-                 mail.send(msg)
+            # Si el correo está registrado pero no verificado, reenviar el correo de confirmación
+            if not existing_user_by_email[0]["is_verified"]:
+                # Enviar correo de verificación
+                token = serializer.dumps(email, salt="email-confirm")
+                confirm_url = url_for('confirm_email', token=token, _external=True)
+                msg = Message('Confirma tu correo electrónico', recipients=[email])
+                msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
+                mail.send(msg)
 
                 flash("Este correo ya está registrado. Hemos reenviado el correo de confirmación.", "info")
                 return redirect(url_for('login'))
 
-    else:
-        flash("Este correo ya está registrado y verificado. Puedes iniciar sesión.", "info")
-        return redirect(url_for('login'))
-        else:
-            # Registrar un nuevo usuario
-            hashed_password = generate_password_hash(password)
-            response = supabase.table("users").insert({
-              "username": username,
-              "email": email,
-              "password_hash": hashed_password,
-              "is_verified": False,
-              "privacy_accepted": False,
-              "show_accept": True,
-              "subscription": "free"
-            }).execute()
-            if response.data:
-               flash("Registro exitoso. Revisa tu correo para confirmar tu cuenta.", "success")
             else:
-               flash("Hubo un problema al registrar tu cuenta.", "danger")
-               return redirect(url_for('register'))
+                flash("Este correo ya está registrado y verificado. Puedes iniciar sesión.", "info")
+                return redirect(url_for('login'))
 
+        # Registrar un nuevo usuario
+        hashed_password = generate_password_hash(password)
+        response = supabase.table("users").insert({
+            "username": username,
+            "email": email,
+            "password_hash": hashed_password,
+            "is_verified": False,
+            "privacy_accepted": False,
+            "show_accept": True,
+            "subscription": "free"
+        }).execute()
 
-            # Enviar correo de verificación
-            token = serializer.dumps(email, salt="email-confirm")
-            confirm_url = url_for('confirm_email', token=token, _external=True)
-            msg = Message('Confirma tu correo electrónico', recipients=[email])
-            msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
-            mail.send(msg)
-
+        if response.data:
             flash("Registro exitoso. Revisa tu correo para confirmar tu cuenta.", "success")
-            return redirect(url_for('login'))
+        else:
+            flash("Hubo un problema al registrar tu cuenta.", "danger")
+            return redirect(url_for('register'))
+
+        # Enviar correo de verificación
+        token = serializer.dumps(email, salt="email-confirm")
+        confirm_url = url_for('confirm_email', token=token, _external=True)
+        msg = Message('Confirma tu correo electrónico', recipients=[email])
+        msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
+        mail.send(msg)
+
+        flash("Registro exitoso. Revisa tu correo para confirmar tu cuenta.", "success")
+        return redirect(url_for('login'))
+
     return render_template('register.html')
 
 @app.route('/confirm/<token>')
