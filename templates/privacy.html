@@ -83,7 +83,7 @@
     </div>
     
     
-    {% if not accept_privacy %}
+    {% if show_accept %}
         <form method="POST" action="{{ url_for('accept_privacy') }}">
             <button type="submit">Aceptar Política de Privacidad</button>
         </form>
