@@ -211,7 +211,7 @@ def register():
         msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
         mail.send(msg)
 
-        flash("Registro exitoso. Revisa tu correo para confirmar tu cuenta.", "success")
+        
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -228,11 +228,10 @@ def confirm_email(token):
             # Actualizar el estado de verificación
             response = supabase.table("users").update({"is_verified": True}).eq("email", email).execute()
             
-            if response.error:  # Verificar si hubo un error en la respuesta
+            if response.data:  # Verificar si hubo un error en la respuesta
+                flash("¡Correo confirmado exitosamente! Ahora puedes iniciar sesión.", "success")
+            else
                 flash("Hubo un problema al confirmar tu correo.", "danger")
-                return redirect(url_for('login'))
-
-            flash("¡Correo confirmado exitosamente! Ahora puedes iniciar sesión.", "success")
             return redirect(url_for('login'))
         else:
             flash("Usuario no encontrado.", "danger")
