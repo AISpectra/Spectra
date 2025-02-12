@@ -435,12 +435,13 @@ def suscripcion():
             current_user.subscription = 'premium'  # Guardamos el plan premium en la base de datos
         
         response = supabase.table("users").update({"subscription": plan}).eq("id", current_user.id).execute()
-        if response.status_code == 200:
+        
+        # Verificar si la respuesta contiene datos válidos
+        if response.data:
             flash("Suscripción actualizada.", "success")
         else:
             flash("Hubo un error al actualizar la suscripción.", "danger")
 
-        
         # Redirigir al chat o al lugar correspondiente según el plan
         if plan == 'free':
             return redirect(url_for('chat'))  # O la ruta que corresponde al chat
