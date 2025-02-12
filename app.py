@@ -230,7 +230,7 @@ def confirm_email(token):
             
             if response.data:  # Verificar si hubo un error en la respuesta
                 flash("¡Correo confirmado exitosamente! Ahora puedes iniciar sesión.", "success")
-            else
+            else:
                 flash("Hubo un problema al confirmar tu correo.", "danger")
             return redirect(url_for('login'))
         else:
