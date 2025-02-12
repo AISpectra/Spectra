@@ -379,7 +379,7 @@ def privacy():
     # return render_template('privacy.html')
     return render_template('privacy.html', show_accept=current_user.show_accept)
 
-@app.route('/accept_privacy', methods=['POST'])
+@app.route('/accept_privacy', methods=['GET', 'POST'])
 @login_required
 def accept_privacy():
     # Actualizar los valores de privacidad en Supabase
