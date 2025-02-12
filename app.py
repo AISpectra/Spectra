@@ -348,6 +348,7 @@ def login():
 
         # Crear instancia de usuario
         user_obj = User(user["id"], user["username"], user["email"])  # Asumo que User toma estos argumentos
+        print(f"ID: {user['id']}, Username: {user['username']}, Email: {user['email']}")
         login_user(user_obj)
 
         # Verificar si ha aceptado la política de privacidad
