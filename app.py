@@ -341,6 +341,9 @@ def login():
         # Buscar por username o email
         user_data = supabase.table("users").select("*").eq("email", identifier).execute().data
 
+        if not user_data:  # Si no se encuentra por email, buscar por username
+            user_data = supabase.table("users").select("*").eq("username", identifier).execute().data
+
         if not user_data:  # Si no hay datos, mostrar error
             flash("Usuario no encontrado", "danger")
             return redirect(url_for('login'))
