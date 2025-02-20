@@ -43,15 +43,15 @@ def create_paypal_subscription():
         "plan_id": PAYPAL_PLAN_ID,  
         "subscriber": {
             "name": {
-                "given_name": "Nombre",
+                "given_name": current_user.username,
                 "surname": "Apellido"
             },
-            "email_address": "cliente@email.com"
+            "email_address": current_user.email
         },
         "application_context": {
             "brand_name": "Spectra",
-            "return_url": "https://emotionalsupportspectra.com/chat",
-            "cancel_url": "https://emotionalsupportspectra.com/suscripcion"
+            "return_url": url_for('suscripcion_exitosa', _external=True),
+            "cancel_url": url_for('suscripcion_cancelada', _external=True)
         }
     }
 
@@ -596,6 +596,20 @@ def actualizar_suscripcion():
     except Exception as e:
         print("Error actualizando suscripción:", e)
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/suscripcion_exitosa')
+@login_required
+def suscripcion_exitosa():
+    # Aquí puedes verificar el estado de la suscripción y actualizar en Supabase
+    supabase.table("usuarios").update({"suscripcion": "premium"}).eq("id", current_user.id).execute()
+    flash("¡Suscripción exitosa!", "success")
+    return redirect(url_for('chat'))
+
+@app.route('/suscripcion_cancelada')
+@login_required
+def suscripcion_cancelada():
+    flash("La suscripción fue cancelada.", "danger")
+    return redirect(url_for('suscripcion'))
 
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
