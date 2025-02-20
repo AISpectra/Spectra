@@ -86,7 +86,7 @@ CORS(app)
 # Configuración de la sesión
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"  # Se almacenará en archivos temporales
-# app.config['SESSION_COOKIE_SECURE'] = True  # Solo en HTTPS
+app.config['SESSION_COOKIE_SECURE'] = True  # Solo en HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Evita acceso por JavaScript
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Reduce riesgo CSRF
 
@@ -591,7 +591,7 @@ def actualizar_suscripcion():
 
     # Actualiza la suscripción en Supabase
     try:
-        response = supabase_client.table("usuarios").update({"suscripcion": "premium"}).eq("id", user_id).execute()
+        response = supabase_client.table("users").update({"suscripcion": "premium"}).eq("id", user_id).execute()
         return jsonify({"success": True})
     except Exception as e:
         print("Error actualizando suscripción:", e)
