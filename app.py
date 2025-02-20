@@ -5,11 +5,67 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import openai
-from dotenv import load_dotenv
+import requests
 import os
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from supabase import create_client, Client
+
+
+
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
+PAYPAL_SECRET = os.getenv("PAYPAL_SECRET")
+PAYPAL_PLAN_ID = os.getenv("PAYPAL_PLAN_ID")
+PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"  # Usa "api-m.paypal.com" en producción.
+
+def get_paypal_access_token():
+    url = f"{PAYPAL_BASE_URL}/v1/oauth2/token"
+    headers = {"Accept": "application/json", "Accept-Language": "en_US"}
+    data = {"grant_type": "client_credentials"}
+    response = requests.post(url, headers=headers, auth=(PAYPAL_CLIENT_ID, PAYPAL_SECRET), data=data)
+    return response.json().get("access_token")
+
+
+def create_paypal_subscription():
+    access_token = get_paypal_access_token()  # Asegúrate de que esta función ya funciona
+    if not access_token:
+        print("No se pudo obtener el access token")
+        return None
+
+    url = "https://api-m.sandbox.paypal.com/v1/billing/subscriptions"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    data = {
+        "plan_id": PAYPAL_PLAN_ID,  
+        "subscriber": {
+            "name": {
+                "given_name": "Nombre",
+                "surname": "Apellido"
+            },
+            "email_address": "cliente@email.com"
+        },
+        "application_context": {
+            "brand_name": "Spectra",
+            "return_url": "https://emotionalsupportspectra.com/chat",
+            "cancel_url": "https://emotionalsupportspectra.com/suscripcion"
+        }
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 201:
+        subscription = response.json()
+        print("Suscripción creada:", subscription)
+        return subscription
+    else:
+        print("Error al crear la suscripción:", response.text)
+        return None
+
+
 
 # Cargar variables de entorno
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -524,6 +580,22 @@ def chat():
     # Si es un GET, mostrar la interfaz del chat
     return render_template('chat.html', subscription=current_user.subscription)
 
+@app.route('/actualizar_suscripcion', methods=['POST'])
+def actualizar_suscripcion():
+    data = request.get_json()
+    subscription_id = data.get('subscriptionID')
+    user_id = request.cookies.get('user_id')  # Ajusta según cómo identifiques al usuario
+
+    if not subscription_id or not user_id:
+        return jsonify({"success": False, "error": "Datos insuficientes"}), 400
+
+    # Actualiza la suscripción en Supabase
+    try:
+        response = supabase_client.table("usuarios").update({"suscripcion": "premium"}).eq("id", user_id).execute()
+        return jsonify({"success": True})
+    except Exception as e:
+        print("Error actualizando suscripción:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
