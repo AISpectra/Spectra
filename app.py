@@ -586,8 +586,9 @@ def chat():
 def actualizar_suscripcion():
     data = request.get_json()
     subscription_id = data.get('subscriptionID')
-    user_id = request.cookies.get('user_id')  # Ajusta según cómo identifiques al usuario
-    # user_id = current_user.id
+    # user_id = request.cookies.get('user_id')  
+    # Ajusta según cómo identifiques al usuario
+    user_id = current_user.id
     if not subscription_id or not user_id:
         return jsonify({"success": False, "error": "Datos insuficientes"}), 400
 
