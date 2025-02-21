@@ -130,7 +130,9 @@
     <div class="plan-actual">
             <p>Tu plan actual: <strong>{{ subscription_actual }}</strong></p>
     </div>
-
+    <script>
+     console.log("paypal_client_id: {{ paypal_client_id }}");
+    </script>
     # <script src="https://www.paypal.com/sdk/js?client-id=AUutMxgoBzf_6k6Wde6nwJGaZXaZbBgqFOWcYRysJukIeTWx0Ug_zT0r2TcBW2cetanK0w0djasXDVTq&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
     <script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 

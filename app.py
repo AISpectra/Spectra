@@ -586,14 +586,15 @@ def chat():
 def actualizar_suscripcion():
     data = request.get_json()
     subscription_id = data.get('subscriptionID')
-    user_id = request.cookies.get('user_id')  # Ajusta según cómo identifiques al usuario
-
+    # user_id = request.cookies.get('user_id')  
+    # Ajusta según cómo identifiques al usuario
+    user_id = current_user.id
     if not subscription_id or not user_id:
         return jsonify({"success": False, "error": "Datos insuficientes"}), 400
 
     # Actualiza la suscripción en Supabase
     try:
-        response = supabase_client.table("users").update({"suscripcion": "premium"}).eq("id", user_id).execute()
+        response = supabase.table("users").update({"suscripcion": "premium"}).eq("id", user_id).execute()
         return jsonify({"success": True})
     except Exception as e:
         print("Error actualizando suscripción:", e)
@@ -603,7 +604,7 @@ def actualizar_suscripcion():
 @login_required
 def suscripcion_exitosa():
     # Aquí puedes verificar el estado de la suscripción y actualizar en Supabase
-    supabase.table("usuarios").update({"suscripcion": "premium"}).eq("id", current_user.id).execute()
+    supabase.table("users").update({"suscripcion": "premium"}).eq("id", current_user.id).execute()
     flash("¡Suscripción exitosa!", "success")
     return redirect(url_for('chat'))
 
