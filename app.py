@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
-import paypalrestsdk
 from flask_session import Session
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -13,15 +12,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from supabase import create_client, Client
 
 
-paypalrestsdk.configure({
-   'mode': 'sandbox',
-   'client_id': os.getenv("PAYPAL_CLIENT_ID"),
-   'client_secret': os.getenv("PAYPAL_SECRET")
-})
-# PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
-# PAYPAL_SECRET = os.getenv("PAYPAL_SECRET")
+
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
+PAYPAL_SECRET = os.getenv("PAYPAL_SECRET")
 PAYPAL_PLAN_ID = os.getenv("PAYPAL_PLAN_ID")
-# PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"  # Usa "api-m.paypal.com" en producción.
+PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"  # Usa "api-m.paypal.com" en producción.
 
 def get_paypal_access_token():
     url = f"{PAYPAL_BASE_URL}/v1/oauth2/token"
