@@ -34,7 +34,7 @@ def create_paypal_subscription():
 
     # Verifica que el plan_id esté definido y correcto
     print("Plan ID:", PAYPAL_PLAN_ID)
-    url = "https://api-m.sandbox.paypal.com/v1/billing/subscriptions"
+    url = f"{PAYPAL_BASE_URL}/v1/billing/subscriptions"
 
     headers = {
         "Content-Type": "application/json",
