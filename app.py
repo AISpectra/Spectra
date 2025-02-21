@@ -484,6 +484,8 @@ def accept_privacy():
 @app.route('/suscripcion', methods=['GET', 'POST'])
 @login_required  # Proteger la vista
 def suscripcion():
+    paypal_client_id = os.getenv("PAYPAL_CLIENT_ID")  # Obtén el Client ID de PayPal desde las variables de entorno
+    
     if request.method == 'POST':
         plan = request.form.get('plan')  # Obtener el plan seleccionado (free o premium)
         
@@ -506,7 +508,7 @@ def suscripcion():
         else:
             return redirect(url_for('chat'))  # O la ruta que corresponde al chat
        
-    return render_template('suscripcion.html', subscription_actual=current_user.subscription)
+    return render_template('suscripcion.html', subscription_actual=current_user.subscription, paypal_client_id=paypal_client_id)
   # Página de suscripción
 
 @app.route('/weekly')
