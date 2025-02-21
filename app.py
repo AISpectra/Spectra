@@ -596,7 +596,7 @@ def actualizar_suscripcion():
 
     # Actualiza la suscripción en Supabase
     try:
-        response = supabase.table("users").update({"suscripcion": "premium"}).eq("id", user_id).execute()
+        response = supabase.table("users").update({"subscription": "premium"}).eq("id", user_id).execute()
         return jsonify({"success": True})
     except Exception as e:
         print("Error actualizando suscripción:", e)
@@ -606,7 +606,7 @@ def actualizar_suscripcion():
 @login_required
 def suscripcion_exitosa():
     # Aquí puedes verificar el estado de la suscripción y actualizar en Supabase
-    supabase.table("users").update({"suscripcion": "premium"}).eq("id", current_user.id).execute()
+    supabase.table("users").update({"subscription": "premium"}).eq("id", current_user.id).execute()
     flash("¡Suscripción exitosa!", "success")
     return redirect(url_for('chat'))
 
