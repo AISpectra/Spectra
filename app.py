@@ -156,7 +156,7 @@ def load_user(user_id):
             user_data[0].get('privacy_accepted', False),
             user_data[0].get('show_accept', False),
             user_data[0].get('subscription', 'free'),
-            user_data[0].get('subscription_id', None)  # Agregado
+            user_data[0].get('subscription_id')  # Agregado
         )
     return None
 
@@ -435,7 +435,8 @@ def login():
             user.get("is_verified", False), 
             user.get("privacy_accepted", False), 
             user.get("show_accept", False), 
-            user.get("subscription", "free")
+            user.get("subscription", "free"),
+            user.get("subscription_id")  # Esto puede ser None si no se ha registrado una suscripción
         )  # Asumo que User toma estos argumentos
         print(f"ID: {user['id']}, Username: {user['username']}, Email: {user['email']}")
         login_user(user_obj)
