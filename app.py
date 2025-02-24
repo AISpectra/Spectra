@@ -155,7 +155,7 @@ def load_user(user_id):
             user_data[0].get('is_verified', False),  # Usar .get() para evitar KeyError
             user_data[0].get('privacy_accepted', False),
             user_data[0].get('show_accept', False),
-            user_data[0].get('subscription', 'free')
+            user_data[0].get('subscription', 'free'),
             user_data[0].get('subscription_id', None)  # Agregado
         )
     return None
