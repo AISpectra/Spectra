@@ -125,10 +125,16 @@
            <p>✔ Personalización de la experiencia.</p>
            <p class="price">9,99€/mes</p>
            <div id="paypal-button-container"></div>
+           <div>
+            {% if subscription_actual == "premium" %}
+             <button id="cancelar-suscripcion" class="subscribe-button" style="background-color: #dc3545;">Cancelar suscripción</button>
+            {% endif %}
+           </div>
         </div>
     </div>
     <div class="plan-actual">
             <p>Tu plan actual: <strong>{{ subscription_actual }}</strong></p>
+
     </div>
     <script>
      console.log("paypal_client_id: {{ paypal_client_id }}");
@@ -137,6 +143,7 @@
     <script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 
     <script>
+       {% if subscription_actual == "free" %}
           paypal.Buttons({
             style: {
                 shape: 'pill',
@@ -173,6 +180,40 @@
                });
             }
           }).render('#paypal-button-container');
+    
+       {% endif %}
+       
     </script>
+    <script>
+     // Solo se ejecuta si existe el botón (es decir, si el usuario tiene suscripción premium)
+     const cancelButton = document.getElementById('cancelar-suscripcion');
+     if (cancelButton) {
+      cancelButton.addEventListener('click', function() {
+       if (confirm("¿Estás seguro de que quieres cancelar tu suscripción?")) {
+        fetch('/cancelar_suscripcion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("Suscripción cancelada exitosamente.");
+            // Puedes redirigir a otra página o refrescar la actual para reflejar el cambio.
+            window.location.href = "/suscripcion";
+          } else {
+            alert("Hubo un problema al cancelar la suscripción: " + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert("Error al cancelar la suscripción.");
+        });
+       }
+      });
+     }
+    </script>
+
 </body>
 </html>

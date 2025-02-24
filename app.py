@@ -616,6 +616,33 @@ def suscripcion_cancelada():
     flash("La suscripción fue cancelada.", "danger")
     return redirect(url_for('suscripcion'))
 
+@app.route('/cancelar_suscripcion', methods=['POST'])
+@login_required
+def cancelar_suscripcion():
+    # Suponiendo que almacenas el ID de suscripción en el usuario, por ejemplo en current_user.subscription_id
+    subscription_id = current_user.subscription_id  
+    if not subscription_id:
+        return jsonify({"success": False, "error": "No hay suscripción activa."}), 400
+
+    access_token = get_paypal_access_token()
+    url = f"{PAYPAL_BASE_URL}/v1/billing/subscriptions/{subscription_id}/cancel"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+    data = {
+        "reason": "El usuario canceló su suscripción."
+    }
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 204:  # 204 No Content indica éxito
+        # Actualiza el estado de la suscripción en Supabase (por ejemplo, a "free" o "canceled")
+        supabase.table("users").update({"subscription": "free", "subscription_id": None}).eq("id", current_user.id).execute()
+        return jsonify({"success": True})
+    else:
+        print("Error al cancelar la suscripción:", response.text)
+        return jsonify({"success": False, "error": response.text}), 500
+
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
 openai.api_key = os.getenv("OPENAI_API_KEY")
