@@ -221,7 +221,7 @@
             <label for="password">Contraseña:</label>
             <div class="password-container">
                 <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" required>
-                <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+                <button type="button" class="toggle-password" onclick="togglePassword()">🙈</button>
             </div>
 
             <input type="submit" value="Iniciar sesión">
@@ -256,10 +256,10 @@
             const toggleButton = document.querySelector(".toggle-password"); // Aquí seleccionamos el botón
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
-                toggleButton.textContent = "🙈";  // Cambiar a mono tapándose los ojos
+                toggleButton.textContent = "👁️";  // Cambiar a mono tapándose los ojos
             } else {
                 passwordInput.type = "password";
-                toggleButton.textContent = "👁️";  // Volver al ojo
+                toggleButton.textContent = "🙈";  // Volver al ojo
             }
         }
         
