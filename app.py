@@ -127,7 +127,7 @@ short_term_memory = {}
 
 # Modelo de usuario
 class User(UserMixin):
-    def __init__(self, id, username, email, is_verified, privacy_accepted, show_accept, subscription):
+    def __init__(self, id, username, email, is_verified, privacy_accepted, show_accept, subscription, subscription_id):
         self.id = id
         self.username = username
         self.email = email
@@ -135,6 +135,7 @@ class User(UserMixin):
         self.privacy_accepted = privacy_accepted
         self.show_accept = show_accept
         self.subscription = subscription
+        self.subscription_id = subscription_id
 
 
 
@@ -155,6 +156,7 @@ def load_user(user_id):
             user_data[0].get('privacy_accepted', False),
             user_data[0].get('show_accept', False),
             user_data[0].get('subscription', 'free')
+            user_data[0].get('subscription_id', None)  # Agregado
         )
     return None
 
@@ -596,7 +598,7 @@ def actualizar_suscripcion():
 
     # Actualiza la suscripción en Supabase
     try:
-        response = supabase.table("users").update({"subscription": "premium"}).eq("id", user_id).execute()
+        response = supabase.table("users").update({"subscription": "premium", "subscription_id": data.get('subscriptionID')}).eq("id", user_id).execute()
         return jsonify({"success": True})
     except Exception as e:
         print("Error actualizando suscripción:", e)
