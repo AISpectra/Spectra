@@ -3,22 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - Spectra</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
+
+        body {
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .title-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #00c6ff;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 10px rgba(0, 198, 255, 0.6);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #f2f2f2;
+            font-weight: 500;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            text-align: left;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #f2f2f2;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            padding: 12px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+            transition: 0.3s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid #00c6ff;
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
+        }
+
+        input[type="submit"] {
+            padding: 12px;
+            font-size: 1rem;
+            background: #00c6ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            font-weight: bold;
+        }
+
+        input[type="submit"]:hover {
+            background: #0094cc;
+            transform: scale(1.05);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .button-container a {
+            padding: 10px 15px;
+            font-size: 1rem;
+            background: #00c6ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s ease, transform 0.3s ease;
+            font-weight: bold;
+        }
+
+        .button-container a:hover {
+            background: #0094cc;
+            transform: scale(1.1);
+        }
+
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-container input {
+            width: 100%;
+            padding-right: 40px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #00c6ff;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: #0094cc;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        p {
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: #00c6ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #0094cc;
+        }
+
         /* Estilo para los mensajes flash */
         .flash-message {
             margin: 15px auto;
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
             font-weight: bold;
             text-align: center;
             width: 80%;
             max-width: 400px;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
         }
 
         .flash-success {
@@ -35,177 +212,9 @@
             background-color: #17a2b8;
             color: white;
         }
-
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f7fa;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
-
-        .title-container {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            font-size: 3rem;
-            color: #007bff;
-            text-transform: uppercase;
-        }
-
-        h2 {
-            font-size: 2rem;
-            color: #333;
-        }
-
-        .container {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .container h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            text-align: left;
-            font-size: 1rem;
-            margin-bottom: 8px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            width: 100%;
-            background-color: #f9f9f9;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-
-        input[type="submit"] {
-            padding: 12px;
-            font-size: 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        .button-container a,
-        .button-container button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .button-container a:hover,
-        .button-container button:hover {
-            background-color: #0056b3;
-        }
-
-        .password-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-
-        .password-container input {
-            width: 100%;
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-            padding-right: 40px;
-        }
-
-        .toggle-password {
-                position: absolute;
-                right: 10px; /* Mantiene el botón a la derecha */
-                top: -15%; /* Lo coloca a la mitad del input */
-                # transform: translateY(-50%); /* Centra el botón verticalmente */
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 1.2rem;
-                color: #007bff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%; /* Ajusta la altura para que coincida con el input */
-        }
-
-
-        .forgot-password {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        p {
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
-           
     <div class="title-container">
         <h1>SPECTRA</h1>
         <h2>Chat Emocional</h2>
@@ -217,16 +226,16 @@
             <label for="identifier">Nombre de usuario o correo electrónico:</label>
             <input type="text" id="identifier" name="identifier" placeholder="Introduce tu usuario o correo" required>
             
-            
             <label for="password">Contraseña:</label>
             <div class="password-container">
                 <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" required>
-                <button type="button" class="toggle-password" onclick="togglePassword()">🙈</button>
+                <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
             </div>
 
             <input type="submit" value="Iniciar sesión">
         </form>
-                     <!-- Mensajes flash -->
+
+        <!-- Mensajes flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <div>
@@ -245,24 +254,17 @@
 
         <p>¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
 
-	<div class="button-container">
+        <div class="button-container">
             <a href="{{ url_for('inicio') }}">Volver al Inicio</a>
-            <!-- Si tienes un endpoint para el inicio, usa la URL adecuada -->
         </div>
     </div>
+
     <script>
         function togglePassword() {
             const passwordInput = document.getElementById("password");
-            const toggleButton = document.querySelector(".toggle-password"); // Aquí seleccionamos el botón
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                toggleButton.textContent = "👁️";  // Cambiar a mono tapándose los ojos
-            } else {
-                passwordInput.type = "password";
-                toggleButton.textContent = "🙈";  // Volver al ojo
-            }
+            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
         }
-        
     </script>
 </body>
 </html>
+
