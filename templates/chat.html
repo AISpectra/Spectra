@@ -133,37 +133,68 @@
         }
 
         /* Menú desplegable */
+        .dropbtn {
+                background: #00c6ff;
+                color: white;
+                padding: 12px 20px;
+                font-size: 18px;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: background 0.3s ease, transform 0.3s ease;
+                box-shadow: 0px 4px 10px rgba(0, 198, 255, 0.5);
+        }
+
+        .dropbtn:hover {
+                background: #0094cc;
+                transform: scale(1.1);
+        }
+
+        .dropbtn:focus {
+                outline: none;
+        }
+
         .dropdown {
-            position: absolute;
-            top: 10px;
-            left: 10px;
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 1000;
         }
 
         .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #00c6ff;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
-            z-index: 1;
-            border-radius: 5px;
+                display: none;
+                position: absolute;
+                background: rgba(0, 198, 255, 0.9);
+                border-radius: 10px;
+                min-width: 180px;
+                box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+                overflow: hidden;
         }
 
-        .dropdown-content a {
-            color: white;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            text-align: left;
+        .dropdown-content a,
+        .dropdown-content form button {
+                display: block;
+                color: white;
+                padding: 12px 16px;
+                text-decoration: none;
+                text-align: left;
+                font-size: 16px;
+                border: none;
+                background: none;
+                cursor: pointer;
+                width: 100%;
         }
 
-        .dropdown-content a:hover {
-            background-color: #0094cc;
+        .dropdown-content a:hover,
+        .dropdown-content form button:hover {
+                background: #0094cc;
         }
 
         .dropdown:hover .dropdown-content {
-            display: block;
+                display: block;
         }
+
     </style>
 </head>
 <body>
