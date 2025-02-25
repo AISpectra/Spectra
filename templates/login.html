@@ -97,20 +97,13 @@
         input[type="submit"] {
             padding: 12px;
             font-size: 1rem;
-            background: #00c6ff;
+            background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s ease, transform 0.3s ease;
-            font-weight: bold;
-            display: flex;  /* Asegura que el botón pueda ser centrado */
-            justify-content: center; /* Centra el texto dentro del botón */
-            text-align: center;
-            margin: 0 auto; /* Centra el botón en el formulario */
-            width: 80%; /* Ajusta el ancho para que no se vea tan grande */
+            transition: background-color 0.3s ease;
         }
-
 
         input[type="submit"]:hover {
             background: #0094cc;
@@ -156,7 +149,7 @@
         .toggle-password {
             position: absolute;
             right: 10px;
-            top: 50%;
+            top: 35%;
             transform: translateY(-50%);
             background: none;
             border: none;
@@ -235,7 +228,7 @@
             <label for="password">Contraseña:</label>
             <div class="password-container">
                 <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" required>
-                <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+                <button type="button" class="toggle-password" onclick="togglePassword()">🙈</button>
             </div>
 
             <input type="submit" value="Iniciar sesión">
@@ -267,9 +260,18 @@
 
     <script>
         function togglePassword() {
-            const passwordInput = document.getElementById("password");
-            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+          const passwordInput = document.getElementById("password");
+          const toggleButton = document.querySelector(".toggle-password"); // Seleccionamos el botón
+
+          if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleButton.textContent = "👁️";  // Cambiar a ojo abierto
+          } else {
+            passwordInput.type = "password";
+            toggleButton.textContent = "🙈";  // Volver al mono tapándose los ojos
+          }
         }
+
     </script>
 </body>
 </html>
