@@ -104,7 +104,13 @@
             cursor: pointer;
             transition: background 0.3s ease, transform 0.3s ease;
             font-weight: bold;
+            display: flex;  /* Asegura que el botón pueda ser centrado */
+            justify-content: center; /* Centra el texto dentro del botón */
+            text-align: center;
+            margin: 0 auto; /* Centra el botón en el formulario */
+            width: 80%; /* Ajusta el ancho para que no se vea tan grande */
         }
+
 
         input[type="submit"]:hover {
             background: #0094cc;
