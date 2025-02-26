@@ -526,6 +526,12 @@ def weekly():
 def iphone_version():
     return render_template("iphone.html")  # Crea un archivo iphone.html
 
+@app.route("/android-version")
+@login_required
+def android_version():
+    return render_template("android.html")
+
+
 @app.route('/chat', methods=['GET', 'POST'])
 @login_required
 def chat():
