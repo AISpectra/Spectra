@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Spectra</title>
+    <style>
+        /* Resetear márgenes y padding por defecto */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+
+        h1 {
+            text-align: center;
+            color: #00c6ff;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        /* Título Spectra */
+        h2 {
+            font-size: 3rem;
+            font-weight: 500;
+            color: #00c6ff;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        h3 {
+            font-size: 2rem;
+            color: #f2f2f2;
+            font-weight: bold;
+        }
+
+
+
+        /* Área de chat */
+        /* Estilo de los mensajes */
+        #chat-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            height: 60vh;
+            overflow-y: auto;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .user-msg, .bot-msg {
+            padding: 12px;
+            border-radius: 10px;
+            max-width: 75%;
+            margin: 10px 0;
+            display: inline-block;
+        }
+
+        .user-msg {
+            background: #00c6ff;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot-msg {
+            background: rgba(255, 255, 255, 0.2);
+            color: #f2f2f2;
+            align-self: flex-start;
+            text-align: left;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+        }
+
+
+        /* Estilo del formulario de chat */
+        #chat-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+
+        }
+
+        #chat-form input {
+            width: 80%;
+            padding: 14px;
+            font-size: 16px;
+            border: none;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+            transition: box-shadow 0.3s ease;
+        }
+
+        #chat-form input:focus {
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
+        }
+
+
+        #chat-form button {
+            padding: 15px;
+            background-color: #00c6ff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        #chat-form button:hover {
+            background: #0094cc;
+            transform: scale(1.05);
+        }
+        
+        
+        .button-container {
+            display: flex;
+            gap: 10px; /* Espacio entre los botones */
+            justify-content: center; /* Centra los botones */
+            width: 100%;
+            max-width: 800px; /* Limitar el ancho máximo para que se vean bien */
+            margin-top: 20px; /* Espacio adicional entre el campo de texto y los botones */
+        }
+
+        .button-container button {
+           padding: 12px 15px;
+           font-size: 18px;
+           background-color: #00c6ff; 
+           border: none;
+           border-radius: 10px;
+           cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background: #0094cc;
+            transform: scale(1.1);
+        }
+
+        /* Estilo para el desplegable */
+        .dropbtn {
+           background: #00c6ff;
+           color: white;
+           padding: 12px 20px;
+           font-size: 18px;
+           border: none;
+           border-radius: 10px;
+           cursor: pointer;
+           transition: background 0.3s ease, transform 0.3s ease;
+           box-shadow: 0px 4px 10px rgba(0, 198, 255, 0.5);
+        }
+
+        .dropbtn:hover {
+           background: #0094cc;
+           transform: scale(1.1);
+        }
+        .dropbtn:focus {
+                outline: none;
+        }
+
+        .dropdown {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 1000;
+        }
+
+
+        .dropdown-content {
+                display: none;
+                position: absolute;
+                background: rgba(0, 198, 255, 0.9);
+                border-radius: 10px;
+                min-width: 180px;
+                box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+                overflow: hidden;
+        }
+
+        .dropdown-content a,
+        .dropdown-content form button {
+                display: block;
+                color: white;
+                padding: 12px 16px;
+                text-decoration: none;
+                text-align: left;
+                font-size: 16px;
+                border: none;
+                background: none;
+                cursor: pointer;
+                width: 100%;
+        }
+
+        .dropdown-content a:hover,
+        .dropdown-content form button:hover {
+                background: #0094cc;
+        }
+
+        .dropdown:hover .dropdown-content {
+                display: block;
+        }
+
+
+        @media (max-width: 768px) {
+           h2 {
+              margin-top: 50px; /* Aumenta el margen superior para separarlo del menú */
+           }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h2>SPECTRA</h2>
+    <h3>Chat Emocional</h3>
+    <h1>Bienvenido al Chat, {{ current_user.username }}</h1>
+
+    <!-- Menú desplegable en la esquina superior izquierda -->
+    <div class="dropdown">
+        <button class="dropbtn">Menú</button>
+	<div class="dropdown-content">
+  	  {% if subscription != 'free' %}
+      	     <a href="{{ url_for('weekly') }}">Weekly Letter</a>
+ 	  {% endif %}
+  	  <a href="{{ url_for('suscripcion') }}">Suscripción</a>
+          <a href="{{ url_for('privacy') }}">Política de Privacidad</a>
+  	  <a href="{{ url_for('inicio') }}">Inicio</a> 
+  	  <form method="POST" action="{{ url_for('logout') }}" id="logout-btn">
+             <button type="submit">Cerrar sesión</button>
+  	  </form>
+	</div>
+    </div>
+
+    <!-- Aquí irá el área de chat donde el usuario interactúa con el bot -->
+    <div id="chat-box">
+        <!-- Los mensajes del chat se irán añadiendo aquí -->
+    </div>
+
+    <!-- Formulario para enviar mensajes -->
+    <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Escribe tu mensaje..." required>
+        <button type="submit"id="sendButton">Enviar</button>
+    </form>
+    <div class="button-container">
+        <button id="toggle-continuous">🔄</button>
+        <!-- Este botón activará y desactivará el micrófono -->
+        <button id="micButton" onclick="startSpeechRecognition()"style="background: none; border: none; font-size: 24px; cursor: pointer;">🎤</button>
+        <button type="button" id="toggle-voice" style="background: none; border: none; font-size: 24px; cursor: pointer;">
+          🔇
+        </button>
+    </div>
+    
+
+    <script>
+        
+
+
+        let voiceEnabled = false; // Estado inicial: voz activada
+        // Variable global para almacenar las voces
+        let voices = [];
+
+        function speakText(text) {
+           if (!voiceEnabled) return; // Si la voz está desactivada, no habla
+           
+           speechSynthesis.cancel(); // Detiene cualquier voz en curso antes de empezar
+           
+           // Dividir el texto por los signos de puntuación (., ?, !)
+           const sentences = text.split(/([.?!])/).filter(Boolean); // Dividir y mantener los signos de puntuación
+           let sentenceIndex = 0;
+
+           function speakNextSentence() {
+              if (sentenceIndex < sentences.length) {
+                let sentence = sentences[sentenceIndex].trim(); // Eliminar posibles espacios adicionales
+
+                if (sentenceIndex + 1 < sentences.length) {
+                   // Asegurarnos de que los signos de puntuación queden al final de la frase
+                   sentence += sentences[sentenceIndex + 1].trim();
+                   sentenceIndex++; // Pasar al siguiente fragmento
+                }
+
+                const speech = new SpeechSynthesisUtterance(sentence);
+                speech.lang = 'es-ES'; // Español
+         
+                // Si las voces ya están cargadas, usarlas
+                if (voices.length > 0) {
+                    const femaleVoices = voices.filter(voice => voice.lang === "es-ES" && (voice.name.includes("Google")));
+                    const googleVoice = voices.find(voice => voice.name === "Google español");
+                    // const preferredVoice = voices.find(voice => voice.name.includes("Google") && voice.lang === "es-ES");
+                    speech.voice = femaleVoices[0] || googleVoice || voices.find(voice => voice.lang === "es-ES") || voices[0]; // Fallback final a la primera voz disponible
+                    // Imprimir el nombre de la voz que está siendo utilizada
+                    console.log("Voz seleccionada:", speech.voice.name);
+                    // if (preferredVoice) {
+                        // speech.voice = preferredVoice;
+                        // speech.voice = googleVoice || femaleVoices[0] || voices.find(voice => voice.lang === "es-ES");
+                    // }
+                }
+
+                speech.rate = 1.0; // Un poco más pausado
+                speech.pitch = 1.2; // Un poco más cálido
+                speechSynthesis.speak(speech);
+
+                sentenceIndex++; // Incrementar el índice para el siguiente fragmento
+                // Asegurarnos de que se llame a la siguiente parte cuando termine
+                speech.onend = function() {
+                  speakNextSentence();
+    
+                  if (continuousConversation && sentenceIndex >= sentences.length) {
+                     setTimeout(() => {
+                       if (!speechSynthesis.speaking) {  // Esperar a que realmente termine
+                          startSpeechRecognition();
+                       }
+                     }, 2000); // Aseguramos una pausa antes de activar el micrófono
+                  }
+                };
+
+              }
+           }
+
+           // Comenzamos con la primera frase
+           speakNextSentence();
+           
+        }
+
+        // Asegurarnos de cargar las voces antes de usarlas
+        speechSynthesis.onvoiceschanged = function() {
+                voices = speechSynthesis.getVoices(); // Obtener las voces disponibles
+                if (voices.length > 0) {
+                   speakText(""); // Esto fuerza la carga de voces en algunos navegadores
+                }
+        };
+
+
+
+        document.getElementById("chat-form").addEventListener("submit", function(event) {
+           if (micEnabled) {
+              event.preventDefault(); // Evita que se envíe mientras el micrófono está activo
+              console.log("No se puede enviar mientras hablas");
+              return;
+           }
+           event.preventDefault();
+           const userMessage = document.getElementById("user-input").value;
+           const chatBox = document.getElementById("chat-box");
+
+           // Mostrar mensaje del usuario en el chat
+           chatBox.innerHTML += `<div class="user-msg">Tú: ${userMessage}</div>`;
+           document.getElementById("user-input").value = "";
+           
+           const typingIndicator = document.createElement("div");
+           typingIndicator.textContent = "Spectra está escribiendo...";
+           typingIndicator.style.fontStyle = "italic";
+           typingIndicator.style.color = "#777";
+           chatBox.appendChild(typingIndicator);
+           chatBox.scrollTop = chatBox.scrollHeight;
+
+
+        // Enviar el mensaje al servidor (para que el bot responda)
+           fetch('/chat', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: userMessage })
+           })
+           .then(response => response.json())
+           .then(data => {
+               if (data.response) {
+                  chatBox.removeChild(typingIndicator);
+                  const botResponse = `<div class="bot-msg"><b>Spectra:</b> ${data.response}</div>`;
+                  chatBox.innerHTML += botResponse;
+                  chatBox.scrollTop = chatBox.scrollHeight;  // Desplazar el chat hacia abajo
+
+                  // Reproducir la respuesta del bot en voz alta
+                  speakText(data.response);
+               } else {
+                  chatBox.innerHTML += `<div class="bot-msg"><b>Spectra:</b> Hubo un problema al procesar tu mensaje.</div>`;
+               }
+           })
+           .catch(error => {
+               chatBox.innerHTML += `<div class="bot-msg"><b>Spectra:</b> Error al enviar el mensaje.</div>`;
+           });
+        });
+        document.getElementById("toggle-voice").addEventListener("click", function() {
+          voiceEnabled = !voiceEnabled; // Alternar entre activado/desactivado
+          this.textContent = voiceEnabled ? "🔊" : "🔇"; // Cambiar el icono del botón
+          if (!voiceEnabled) {
+             speechSynthesis.cancel(); // Detener cualquier voz en curso inmediatamente
+          }
+        });
+        
+        
+        document.getElementById("toggle-continuous").addEventListener("click", function() {
+            continuousConversation = !continuousConversation; // Alternar estado
+            this.textContent = continuousConversation ? "🔄 ON" : "🔄 OFF"; // Cambiar el texto del botón
+        });
+
+
+        const micButton = document.getElementById('micButton');
+        let micEnabled = false; 
+        let recognition;
+        let silenceTimer;
+        let finalTranscript = ""; // Almacenar el texto final reconocido
+
+        function startSpeechRecognition() {
+                if (micEnabled) {
+                        micEnabled = false;
+                        recognition.stop(); // Apagar si ya está activo
+                        document.getElementById("micButton").textContent = "🎤";
+                        return;
+                }
+
+                micEnabled = true;
+                document.getElementById("micButton").textContent = "🛑";
+
+                if (!('webkitSpeechRecognition' in window)) {
+                        alert("Tu navegador no soporta esta funcionalidad.");
+                        return;
+                }
+
+                if (recognition) {
+                        recognition.stop(); // Asegurar que cualquier sesión previa se detenga antes de iniciar una nueva
+                }
+
+                recognition = new webkitSpeechRecognition();
+                recognition.lang = 'es-ES';
+                let isAndroid = /Android/i.test(navigator.userAgent);
+                recognition.continuous = !isAndroid; // En Android, continuous = false
+                recognition.interimResults = true;
+                recognition.autoPunctuation = true;
+
+                recognition.onresult = function(event) {
+                        let interimTranscript = "";
+                        finalTranscript = ""; // Reiniciar el texto acumulado para evitar repeticiones
+
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                                if (event.results[i].isFinal) {
+                                        finalTranscript = event.results[i][0].transcript; // Reemplazar en lugar de acumular
+                                } else {
+                                        interimTranscript += event.results[i][0].transcript;
+                                }
+                        }
+
+                        document.getElementById("user-input").value = finalTranscript + interimTranscript;
+
+                        clearTimeout(silenceTimer);
+                        silenceTimer = setTimeout(() => {
+                                if (finalTranscript.trim() !== "") {
+                                        sendTextMessage(finalTranscript.trim());
+                                }
+                                setTimeout(() => {
+                                        recognition.stop();
+                                        micEnabled = false;
+                                        document.getElementById("micButton").textContent = "🎤";
+                                }, 500);
+                        }, 2000);
+                };
+
+                recognition.start();
+        }
+
+
+
+    // Función para enviar el mensaje (puedes modificarla según tu implementación)
+    function sendTextMessage(text) {
+       micEnabled = false; // Apagar el micrófono antes de enviar
+       document.getElementById("micButton").textContent = "🎤"; 
+       const inputField = document.getElementById("user-input");
+       const form = document.getElementById("chat-form");
+
+       inputField.value = text; // Insertar el texto en el campo de entrada
+
+       setTimeout(() => {
+          form.requestSubmit(); // Enviar formulario de manera más confiable
+       }, 100); // Pequeña pausa para asegurar que el texto se refleje antes del envío
+    }
+
+    let continuousConversation = false; // Modo apagado por defecto
+    
+
+
+    
+    document.getElementById("toggle-voice").addEventListener("click", function() {
+        const botMessages = document.querySelectorAll(".bot-msg"); // Obtener todos los mensajes de Spectra
+        if (botMessages.length > 0) {
+           const lastMessage = botMessages[botMessages.length - 1].innerText.replace("Spectra:", "").trim();
+           speakText(lastMessage); // Leer en voz alta el último mensaje
+        } else {
+           alert("No hay mensajes de Spectra para leer.");
+        }
+    });
+
+    </script>
+
+</body>
+</html>
