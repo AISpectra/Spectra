@@ -69,16 +69,24 @@
         <div class="text" id="breathText">Bienvenido a la sesión...</div>
         <div class="controls">
             <button onclick="toggleAudio()">Pausar/Reanudar</button>
+            <a href="chat.html">
+                <button>Volver al Chat</button>
+            </a>
         </div>
     </div>
     <audio id="breathingAudio" loop>
         <source src="breathing_guide.mp3" type="audio/mpeg">
         Tu navegador no soporta el audio.
     </audio>
+    <audio id="backgroundMusic" loop>
+        <source src="background_music.mp3" type="audio/mpeg">
+        Tu navegador no soporta el audio.
+    </audio>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const breathText = document.getElementById("breathText");
             const audio = document.getElementById("breathingAudio");
+            const backgroundMusic = document.getElementById("backgroundMusic");
             let isPlaying = true;
             
             const script = [
@@ -108,11 +116,16 @@
             window.toggleAudio = function() {
                 if (isPlaying) {
                     audio.pause();
+                    backgroundMusic.pause();
                 } else {
                     audio.play();
+                    backgroundMusic.play();
                 }
                 isPlaying = !isPlaying;
             }
+            
+            audio.play();
+            backgroundMusic.play();
             
             // Generar partículas flotantes
             const particleContainer = document.querySelector(".particles");
