@@ -521,6 +521,11 @@ def suscripcion():
 def weekly():
     return render_template('weekly.html')  # Página semanal
 
+@app.route('/respiracion')
+@login_required
+def respiracion():
+    return render_template('respiracion.html')  # Página de respiración guiada
+
 @app.route('/iphone-version')
 @login_required
 def iphone_version():
