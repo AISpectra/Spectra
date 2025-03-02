@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Respiración Guiada</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #0d1b2a, #203a43);
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            position: relative;
+        }
+        .circle {
+            width: 100px;
+            height: 100px;
+            background-color: #4A90E2;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: breathing 6s infinite ease-in-out;
+        }
+        @keyframes breathing {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+        .text {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .particles {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: float 5s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); opacity: 0.5; }
+            50% { transform: translateY(-50px); opacity: 1; }
+            100% { transform: translateY(0px); opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+    <div class="container">
+        <div class="circle"></div>
+        <div class="text" id="breathText">Bienvenido a la sesión...</div>
+        <div class="controls">
+            <button onclick="toggleAudio()">Pausar/Reanudar</button>
+        </div>
+    </div>
+    <audio id="breathingAudio" loop>
+        <source src="breathing_guide.mp3" type="audio/mpeg">
+        Tu navegador no soporta el audio.
+    </audio>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const breathText = document.getElementById("breathText");
+            const audio = document.getElementById("breathingAudio");
+            let isPlaying = true;
+            
+            const script = [
+                "Bienvenido a esta sesión de respiración guiada. Encuentra un lugar cómodo...",
+                "Toma una respiración profunda por la nariz...",
+                "Ahora, exhala lentamente por la boca...",
+                "Inhala profundamente... 1, 2, 3...",
+                "Sostén el aire por un momento...",
+                "Exhala suavemente... 3, 2, 1...",
+                "Imagina que con cada inhalación llenas tu cuerpo de calma y tranquilidad...",
+                "Con cada exhalación, suelta cualquier tensión o preocupación...",
+                "Vamos a tomar una última respiración profunda juntos...",
+                "Cuando estés listo, puedes abrir los ojos y continuar tu día con calma y claridad..."
+            ];
+            
+            let index = 0;
+            function updateText() {
+                if (index < script.length) {
+                    breathText.innerText = script[index];
+                    index++;
+                    setTimeout(updateText, 6000);
+                }
+            }
+            
+            updateText();
+            
+            window.toggleAudio = function() {
+                if (isPlaying) {
+                    audio.pause();
+                } else {
+                    audio.play();
+                }
+                isPlaying = !isPlaying;
+            }
+            
+            // Generar partículas flotantes
+            const particleContainer = document.querySelector(".particles");
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement("div");
+                particle.classList.add("particle");
+                particle.style.left = Math.random() * 100 + "vw";
+                particle.style.top = Math.random() * 100 + "vh";
+                particle.style.animationDuration = (Math.random() * 5 + 3) + "s";
+                particleContainer.appendChild(particle);
+            }
+        });
+    </script>
+</body>
+</html>
