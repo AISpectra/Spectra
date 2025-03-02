@@ -241,6 +241,9 @@
   	  <a href="{{ url_for('suscripcion') }}">Suscripción</a>
           <a href="{{ url_for('privacy') }}">Política de Privacidad</a>
   	  <a href="{{ url_for('inicio') }}">Inicio</a> 
+          {% if subscription != 'free' %}
+          <a href="{{ url_for('respiracion') }}">Respiración Guiada</a>
+          {% endif %}
   	  <form method="POST" action="{{ url_for('logout') }}" id="logout-btn">
              <button type="submit">Cerrar sesión</button>
   	  </form>
