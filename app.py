@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, Markup
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from markupsafe import Markup
 import re
 from flask_session import Session
 from datetime import datetime
