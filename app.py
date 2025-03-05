@@ -265,7 +265,7 @@ def ejecutar_tarea_semanal():
     """Ejecuta la generación de Weekly Letter cada semana automáticamente."""
     while True:
         generar_weekly_letter()
-        time.sleep(120)  # 7 días en segundos (1 semana)
+        time.sleep(604800)  # 7 días en segundos (1 semana)
 
 
 
@@ -738,5 +738,6 @@ def weekly():
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 if __name__ == '__main__':
-    Thread(target=ejecutar_tarea_semanal, daemon=True).start()
+    print("🔹 Ejecutando generación de Weekly Letter en el arranque...")
+    generar_weekly_letter()  # Forzar ejecución
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
