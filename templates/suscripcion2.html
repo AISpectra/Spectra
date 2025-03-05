@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes de Suscripción - Spectra</title>
+    <style>
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInAnimation 1s ease-in-out forwards;
+        }
+
+        @keyframes fadeInAnimation {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #00c6ff, #0094cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .subscription-container {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+            flex-wrap: nowrap;
+        }
+
+        .plan {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 30%;
+            min-width: 300px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .plan:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 198, 255, 0.6);
+        }
+
+        .plan:nth-child(3) {
+            border: 2px solid transparent;
+            animation: glowingBorder 1.5s infinite alternate;
+        }
+
+        @keyframes glowingBorder {
+            0% { border-color: rgba(255, 223, 0, 0.5); }
+            100% { border-color: rgba(255, 223, 0, 1); }
+        }
+
+        .plan h2 {
+            font-size: 1.8rem;
+            color: #00c6ff;
+            margin-bottom: 15px;
+        }
+
+        .plan p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-shadow: 0px 0px 15px rgba(255, 223, 0, 0.6);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .nav-button {
+            display: block;
+            background: linear-gradient(to right, #00c6ff, #0094cc);
+            color: white;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0, 198, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: skewX(-45deg);
+            transition: left 0.5s ease-in-out;
+        }
+
+        .nav-button:hover::before {
+            left: 150%;
+        }
+
+        .nav-button:hover {
+            background: #0094cc;
+            transform: scale(1.05);
+            box-shadow: 0px 6px 15px rgba(0, 198, 255, 0.7);
+        }
+
+        @media (max-width: 1024px) {
+            .subscription-container {
+                flex-wrap: wrap;
+            }
+
+            .plan {
+                width: 45%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .plan {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="fade-in">Elige tu plan en Spectra</h1>
+
+    <div class="subscription-container fade-in">
+        <div class="plan">
+            <h2>Versión Gratuita</h2>
+            <p>Accede a Spectra con funcionalidades básicas sin ningún costo.</p>
+            <p>✔ Acceso al chatbot de apoyo emocional.</p>
+            <p>✔ Interacciones limitadas por día.</p>
+            <p>✔ Acceso a respuestas estándar.</p>
+            <p>✖ Sin personalización avanzada.</p>
+            <p>✖ No incluye prioridad en respuestas.</p>
+            <p class="price">Gratis</p>
+        </div>
+
+        <div class="plan">
+            <h2>Versión Testers</h2>
+            <p>Desbloquea todo el potencial de Spectra con la mejor experiencia.</p>
+            <p>✔ Interacciones ilimitadas.</p>
+            <p>✔ Respuestas más detalladas y avanzadas.</p>
+            <p>✔ Prioridad en tiempos de respuesta.</p>
+            <p>✔ Acceso a la Weekly Letter exclusiva.</p>
+            <p>✔ Personalización de la experiencia.</p>
+            <p class="price">Gratis</p>
+        </div>
+
+        <div class="plan">
+            <h2>Versión Premium</h2>
+            <p>Desbloquea todo el potencial de Spectra con la mejor experiencia.</p>
+            <p>✔ Interacciones ilimitadas.</p>
+            <p>✔ Respuestas más detalladas y avanzadas.</p>
+            <p>✔ Prioridad en tiempos de respuesta.</p>
+            <p>✔ Acceso a la Weekly Letter exclusiva.</p>
+            <p>✔ Personalización de la experiencia.</p>
+            <p class="price">9,99€/mes</p>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <a href="{{ url_for('inicio') }}" class="nav-button">Volver al Inicio</a>
+        <a href="{{ url_for('register') }}" class="nav-button">Registrarse</a>
+    </div>
+
+</body>
+</html>

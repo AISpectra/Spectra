@@ -521,6 +521,10 @@ def suscripcion():
 def weekly():
     return render_template('weekly.html')  # Página semanal
 
+@app.route('/suscription2')
+def suscription2():
+    return render_template('suscription2.html') 
+
 @app.route('/respiracion')
 @login_required
 def respiracion():

@@ -116,6 +116,15 @@
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .secondary-button {
+            background: linear-gradient(90deg, #ff8c00, #ff5e00); /* Diferente color */
+            margin-top: 15px; /* Espaciado entre botones */
+        }
+
+        .secondary-button:hover {
+            box-shadow: 0px 0px 20px rgba(255, 94, 0, 0.8);
+        }
+
     </style>
 
     <!-- Script para el fondo animado -->
@@ -148,6 +157,7 @@
         <h1>Bienvenido a Spectra</h1>
         <h2>Tu espacio para el bienestar emocional</h2>
         <a href="{{ url_for('login') }}" class="start-button">Comenzar con Spectra</a>
+        <a href="{{ url_for('suscription2') }}" class="start-button secondary-button">Consultar Precios</a>
     </div>
 
     <!-- Contenido informativo -->
