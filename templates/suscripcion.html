@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suscripción - Spectra</title>
     <style>
+        .fade-in {
+          opacity: 0;
+          transform: translateY(20px);
+          animation: fadeInAnimation 1s ease-in-out forwards;
+        }
+        @keyframes fadeInAnimation {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,37 +22,60 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f7fa;
-            color: #333;
-            text-align: center;
-            padding: 20px;
+          font-family: 'Arial', sans-serif;
+          background: linear-gradient(to right, #141e30, #243b55);
+          color: white;
+          text-align: center;
+          padding: 20px;
         }
 
+
         h1 {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 30px;
+          font-size: 3rem;
+          font-weight: bold;
+          background: linear-gradient(to right, #00c6ff, #0094cc);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 30px;
         }
+
 
         .subscription-container {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            max-width: 1000px;
+            align-items: stretch; /* Hace que todos los planes tengan la misma altura */
+            gap: 20px;
+            max-width: 1200px; /* Ajusta el ancho máximo */
             margin: auto;
+            flex-wrap: nowrap; /* Evita que los planes se acomoden en otra fila */
         }
 
+
         .plan {
-            background-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 30%; /* Ajusta el ancho de cada plan */
+            min-width: 300px; /* Evita que los planes sean demasiado pequeños */
             text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
+        .plan:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 198, 255, 0.6);
+        }
+
+        .plan:nth-child(3) {
+            border: 2px solid transparent;
+            animation: glowingBorder 1.5s infinite alternate;
+        }
+        @keyframes glowingBorder {
+            0% { border-color: rgba(255, 223, 0, 0.5); }
+            100% { border-color: rgba(255, 223, 0, 1); }
+        }
+
 
         .plan h2 {
             font-size: 1.8rem;
@@ -57,35 +90,79 @@
         }
 
         .price {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
+          font-size: 2.2rem;
+          font-weight: bold;
+          background: linear-gradient(to right, #ffd700, #ff8c00);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 20px;
+          text-shadow: 0px 0px 15px rgba(255, 223, 0, 0.6);
         }
 
+
         .subscribe-button {
-            display: block;
-            background-color: #007bff;
-            color: white;
-            padding: 15px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            max-width: 300px;
-            margin: 20px auto 0 auto;
+           display: block;
+           background: linear-gradient(to right, #00c6ff, #0094cc);
+           color: white;
+           padding: 15px;
+           font-size: 1.2rem;
+           font-weight: bold;
+           border-radius: 10px;
+           text-decoration: none;
+           transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+           width: 100%;
+           max-width: 300px;
+           margin: 20px auto 0 auto;
+           box-shadow: 0px 4px 10px rgba(0, 198, 255, 0.5);
+           position: relative;
+           overflow: hidden;
+        }
+        .subscribe-button::before {
+           content: "";
+           position: absolute;
+           top: 0;
+           left: -100%;
+           width: 100%;
+           height: 100%;
+           background: rgba(255, 255, 255, 0.2);
+           transform: skewX(-45deg);
+           transition: left 0.5s ease-in-out;
+        }
+        .subscribe-button:hover::before {
+           left: 150%;
+        }
+        .subscribe-button:hover {
+           background: #0094cc;
+           transform: scale(1.05);
+           box-shadow: 0px 6px 15px rgba(0, 198, 255, 0.7);
         }
 
         .subscribe-button:hover {
-            background-color: #0056b3;
+           background: #0094cc;
+           transform: scale(1.05);
         }
+        @media (max-width: 1024px) {
+         .subscription-container {
+           flex-wrap: wrap; /* Permite que los planes pasen a otra fila */
+         }
+
+         .plan {
+           width: 45%; /* Permite que haya 2 planes en una fila en pantallas medianas */
+         }
+        }
+
+        @media (max-width: 768px) {
+         .plan {
+           width: 100%; /* Los planes se apilan en pantallas pequeñas */
+         }
+        }
+
     </style>
 </head>
 <body>
-    <h1>Elige tu plan en Spectra</h1>
+    <h1 class="fade-in">Elige tu plan en Spectra</h1>
 
-    <div class="subscription-container">
+    <div class="subscription-container fade-in">
         <div class="plan">
             <h2>Versión Gratuita</h2>
             <p>Accede a Spectra con funcionalidades básicas sin ningún costo.</p>
@@ -115,6 +192,7 @@
             	<button type="submit" class="subscribe-button">Suscribirse</button>
             </form>
         </div>
+
         <div class="plan">
            <h2>Versión Premium</h2>
            <p>Desbloquea todo el potencial de Spectra con la mejor experiencia.</p>
@@ -132,9 +210,8 @@
            </div>
         </div>
     </div>
-    <div class="plan-actual">
+    <div class="plan-actual" style="margin-top: 40px; font-size: 1.5rem; font-weight: bold; color: #00c6ff;">
             <p>Tu plan actual: <strong>{{ subscription_actual }}</strong></p>
-
     </div>
     <script>
      console.log("paypal_client_id: {{ paypal_client_id }}");
