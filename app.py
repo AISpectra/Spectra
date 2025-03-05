@@ -523,7 +523,7 @@ def weekly():
 
 @app.route('/suscription2')
 def suscription2():
-    return render_template('suscription2.html') 
+    return render_template('suscripcion2.html') 
 
 @app.route('/respiracion')
 @login_required
