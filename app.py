@@ -732,12 +732,16 @@ def weekly():
     else:
         return render_template('weekly.html', titulo="Aún no hay contenido", subtitulo="", contenido="La carta de esta semana aún no ha sido generada.")
 
+@app.before_first_request
+def run_weekly_letter():
+    print("🔹 Ejecutando Weekly Letter al recibir la primera solicitud...")
+    generar_weekly_letter()
 
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 if __name__ == '__main__':
-    print("🔹 Ejecutando generación de Weekly Letter en el arranque...")
-    generar_weekly_letter()  # Forzar ejecución
+    print("🔹 Iniciando ejecución de Weekly Letter en el arranque...")
+    Thread(target=ejecutar_tarea_semanal, daemon=True).start()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
