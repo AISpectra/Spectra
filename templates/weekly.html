@@ -181,7 +181,8 @@
     <div class="letter-content">
         <h2>{{ titulo }}</h2>
         {% if subtitulo %} <h3>{{ subtitulo }}</h3> {% endif %}
-        {{ contenido | replace('\n', '<br>') | replace('**', '<b>').replace('**', '</b>', 1) | safe }}
+        <div>{{ contenido | format_weekly | safe }}</div>
+
 
 
     </div>

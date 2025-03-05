@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, Markup
+import re
 from flask_session import Session
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -736,6 +737,19 @@ with app.app_context():
     print("🔹 Ejecutando Weekly Letter al iniciar la app...")
     generar_weekly_letter()
 
+@app.template_filter('format_weekly')
+def format_weekly(text):
+    """Reemplaza saltos de línea con <br> y **negritas** con <b>"""
+    if not text:
+        return ""
+    
+    # Reemplazar saltos de línea por <br>
+    text = text.replace("\n", "<br>")
+
+    # Reemplazar **palabra** por <b>palabra</b>
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+
+    return Markup(text)
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
 openai.api_key = os.getenv("OPENAI_API_KEY")
