@@ -11,6 +11,10 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from supabase import create_client, Client
 from datetime import datetime
+import pytz
+from threading import Thread
+import time
+
 
 
 PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
@@ -205,6 +209,63 @@ def get_user_by_email(email):
     except Exception as e:
         print(f"Error al consultar el usuario: {e}")
         return None
+
+def generar_weekly_letter():
+    """Genera automáticamente una carta semanal con IA y la guarda en Supabase."""
+    
+    # Obtener la semana actual del año
+    tz = pytz.timezone("UTC")  # Ajusta según tu zona horaria si es necesario
+    semana_actual = datetime.now(tz).isocalendar()[1]
+
+    # Verificar si ya existe una carta para esta semana
+    response = supabase.table("weekly_letters").select("*").eq("week", semana_actual).execute()
+    if response.data:
+        print(f"Ya existe una carta para la semana {semana_actual}.")
+        return  # No hacer nada si ya hay una carta para esta semana
+
+    # Pedir a OpenAI que genere contenido
+    prompt = (
+        "Genera un artículo breve sobre bienestar emocional para una newsletter semanal. "
+        "Debe incluir: (1) Un título atractivo, (2) Un subtítulo opcional, (3) Un contenido breve y útil. "
+        "El tema debe ser relevante para el bienestar mental. "
+        "Formato de respuesta:\n"
+        "Título: [Aquí va el título]\n"
+        "Subtítulo: [Aquí va el subtítulo (puede estar vacío)]\n"
+        "Contenido: [Aquí va el texto principal]\n"
+    )
+
+    try:
+        respuesta = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "Eres un experto en bienestar emocional."},
+                      {"role": "user", "content": prompt}]
+        )
+        contenido_ia = respuesta.choices[0].message.content
+
+        # Extraer título, subtítulo y contenido
+        lineas = contenido_ia.split("\n")
+        titulo = lineas[0].replace("Título: ", "").strip()
+        subtitulo = lineas[1].replace("Subtítulo: ", "").strip() if "Subtítulo: " in lineas[1] else ""
+        contenido = "\n".join(lineas[2:]).replace("Contenido: ", "").strip()
+
+        # Guardar en Supabase
+        supabase.table("weekly_letters").insert({
+            "week": semana_actual,
+            "titulo": titulo,
+            "subtitulo": subtitulo,
+            "contenido": contenido
+        }).execute()
+
+        print(f"✅ Weekly Letter generada para la semana {semana_actual}: {titulo}")
+
+    except Exception as e:
+        print(f"❌ Error al generar la Weekly Letter: {e}")
+
+def ejecutar_tarea_semanal():
+    """Ejecuta la generación de Weekly Letter cada semana automáticamente."""
+    while True:
+        generar_weekly_letter()
+        time.sleep(604800)  # 7 días en segundos (1 semana)
 
 
 
@@ -660,28 +721,22 @@ def cancelar_suscripcion():
 @app.route('/weekly')
 @login_required
 def weekly():
-    # Obtener la semana actual del año
-    current_week = datetime.utcnow().isocalendar()[1]
-
-    # Buscar la carta de esta semana en la base de datos de Supabase
-    data = supabase.table("weekly_letters").select("*").eq("week", current_week).execute()
-
-    if data.data:
-        # Si hay contenido para esta semana, lo mostramos
-        letter = data.data[0]
-        return render_template("weekly.html", 
-                               titulo=letter["titulo"], 
-                               subtitulo=letter["subtitulo"], 
-                               contenido=letter["contenido"])
+    """Muestra la carta de la semana actual."""
+    
+    semana_actual = datetime.now(pytz.UTC).isocalendar()[1]
+    response = supabase.table("weekly_letters").select("*").eq("week", semana_actual).execute()
+    
+    if response.data:
+        weekly_letter = response.data[0]
+        return render_template('weekly.html', titulo=weekly_letter['titulo'], subtitulo=weekly_letter['subtitulo'], contenido=weekly_letter['contenido'])
     else:
-        # Si no hay contenido para la semana actual, mostrar un mensaje
-        return render_template("weekly.html", 
-                               titulo="Carta no disponible", 
-                               subtitulo="Estamos preparando la carta de esta semana.",
-                               contenido="Vuelve más tarde para leer la nueva edición de Weekly Letter.")
+        return render_template('weekly.html', titulo="Aún no hay contenido", subtitulo="", contenido="La carta de esta semana aún no ha sido generada.")
+
+
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 if __name__ == '__main__':
+    Thread(target=ejecutar_tarea_semanal, daemon=True).start()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)

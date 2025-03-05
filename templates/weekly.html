@@ -49,18 +49,21 @@
             font-size: 2rem;
             color: #00c6ff;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         .letter-content h3 {
             font-size: 1.5rem;
             color: #ffd700;
             margin-top: 20px;
+            text-align: center;
         }
 
         .letter-content p {
             font-size: 1.1rem;
             line-height: 1.6;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         /* Botón de volver */
@@ -177,11 +180,10 @@
 
     <div class="letter-content">
         <h2>{{ titulo }}</h2>
-        <h3>{{ subtitulo }}</h3>
+        {% if subtitulo %} <h3>{{ subtitulo }}</h3> {% endif %}
         <p>{{ contenido }}</p>
     </div>
 
-    <a href="{{ url_for('inicio') }}" class="back-button">Volver al Inicio</a>
 
 </body>
 </html>
