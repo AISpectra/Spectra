@@ -731,6 +731,10 @@ def weekly():
         return render_template('weekly.html', titulo=weekly_letter['titulo'], subtitulo=weekly_letter['subtitulo'], contenido=weekly_letter['contenido'])
     else:
         return render_template('weekly.html', titulo="Aún no hay contenido", subtitulo="", contenido="La carta de esta semana aún no ha sido generada.")
+@app.route('/generar_carta')
+def generar_carta():
+    generar_weekly_letter()
+    return "✅ Weekly Letter generada manualmente."
 
 
 
