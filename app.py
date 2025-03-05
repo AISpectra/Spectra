@@ -10,7 +10,7 @@ import os
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from supabase import create_client, Client
-
+from datetime import datetime
 
 
 PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
@@ -516,10 +516,6 @@ def suscripcion():
     return render_template('suscripcion.html', subscription_actual=current_user.subscription, paypal_client_id=paypal_client_id)
   # Página de suscripción
 
-@app.route('/weekly')
-@login_required
-def weekly():
-    return render_template('weekly.html')  # Página semanal
 
 @app.route('/suscription2')
 def suscription2():
@@ -661,6 +657,28 @@ def cancelar_suscripcion():
         print("Error al cancelar la suscripción:", response.text)
         return jsonify({"success": False, "error": response.text}), 500
 
+@app.route('/weekly')
+@login_required
+def weekly():
+    # Obtener la semana actual del año
+    current_week = datetime.utcnow().isocalendar()[1]
+
+    # Buscar la carta de esta semana en la base de datos de Supabase
+    data = supabase.table("weekly_letters").select("*").eq("week", current_week).execute()
+
+    if data.data:
+        # Si hay contenido para esta semana, lo mostramos
+        letter = data.data[0]
+        return render_template("weekly.html", 
+                               titulo=letter["titulo"], 
+                               subtitulo=letter["subtitulo"], 
+                               contenido=letter["contenido"])
+    else:
+        # Si no hay contenido para la semana actual, mostrar un mensaje
+        return render_template("weekly.html", 
+                               titulo="Carta no disponible", 
+                               subtitulo="Estamos preparando la carta de esta semana.",
+                               contenido="Vuelve más tarde para leer la nueva edición de Weekly Letter.")
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
 openai.api_key = os.getenv("OPENAI_API_KEY")

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Letter - Spectra</title>
     <style>
+        /* Estilos generales */
         * {
             margin: 0;
             padding: 0;
@@ -13,83 +14,116 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f7fa;
-            color: #333;
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: white;
             padding: 20px;
+            text-align: center;
+            position: relative;
         }
 
+        /* Título */
         h1 {
-            text-align: center;
-            color: #333; /* Título en negro */
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #00c6ff, #0094cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 30px;
-            font-size: 2rem;
+            animation: fadeIn 1s ease-in-out;
         }
 
-        h2 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            font-size: 2.5rem;
-        }
-
+        /* Contenedor de la carta */
         .letter-content {
-            margin: 20px auto;
             max-width: 900px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 1.1rem;
-            line-height: 1.6;
+            margin: auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            text-align: justify;
+            animation: slideUp 1s ease-in-out;
+        }
+
+        .letter-content h2 {
+            font-size: 2rem;
+            color: #00c6ff;
+            margin-bottom: 20px;
         }
 
         .letter-content h3 {
-            font-size: 1.6rem;
-            color: #007bff;
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-top: 20px;
         }
 
-        /* Estilo para el menú desplegable */
+        .letter-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Botón de volver */
+        .back-button {
+            display: inline-block;
+            background: linear-gradient(to right, #00c6ff, #0094cc);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 0px 20px rgba(0, 198, 255, 0.8);
+        }
+
+        /* Menú desplegable */
         .dropdown {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 20px;
+            left: 20px;
             z-index: 1000;
         }
 
         .dropdown button {
-            background-color: #007bff;
+            background-color: #00c6ff;
             color: white;
             padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
+            font-size: 18px;
             border: none;
-            transition: background-color 0.3s ease;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            box-shadow: 0px 4px 10px rgba(0, 198, 255, 0.5);
         }
 
         .dropdown button:hover {
-            background-color: #0056b3;
+            background-color: #0094cc;
+            transform: scale(1.1);
+        }
+
+        .dropbtn:focus {
+            outline: none;
         }
 
         .dropdown-content {
             display: none;
             position: absolute;
-            background-color: #007bff;
-            min-width: 160px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            border-radius: 5px;
-            /* Eliminado el margen superior para eliminar el espacio */
+            background: rgba(0, 198, 255, 0.9);
+            min-width: 180px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            z-index: 1001;
+            overflow: hidden;
         }
 
         .dropdown:hover .dropdown-content {
             display: block;
-        }
-        @media (max-width: 768px) {
-           h1 {
-              margin-top: 50px; /* Aumenta el margen superior para separarlo del menú */
-           }
         }
 
         .dropdown-content a,
@@ -102,6 +136,7 @@
             border: none;
             background: none;
             cursor: pointer;
+            text-align: left;
         }
 
         .dropdown-content a:hover,
@@ -109,28 +144,20 @@
             background-color: #0056b3;
         }
 
-        .dropdown-content button {
-            text-align: left;
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
     </style>
 </head>
 <body>
-
-    <h1>Weekly Letter - Spectra</h1>
-
-    <div class="letter-content">
-        <h2>Estudio de la Semana</h2>
-        <h3>El Impacto del Estrés en el Cerebro</h3>
-        <p>
-            Recientes estudios han demostrado cómo el estrés prolongado puede afectar la estructura cerebral. Investigadores de la Universidad de Yale encontraron que el estrés crónico puede reducir el tamaño del hipocampo, una parte del cerebro clave para la memoria y el aprendizaje. 
-            Además, este estrés puede afectar la regulación emocional y la toma de decisiones, lo que hace aún más importante la gestión adecuada del estrés.
-        </p>
-
-        <h3>Curiosidad de la Semana</h3>
-        <p>
-            ¿Sabías que las personas que practican la gratitud regularmente pueden mejorar su salud mental y física? Un estudio de la Universidad de California encontró que escribir un diario de gratitud puede aumentar la felicidad y reducir los síntomas de depresión. ¡Tomarte un momento cada día para reflexionar sobre lo positivo en tu vida puede ser más poderoso de lo que imaginas!
-        </p>
-    </div>
 
     <!-- Menú desplegable -->
     <div class="dropdown">
@@ -146,7 +173,18 @@
         </div>
     </div>
 
+    <h1>Weekly Letter - Spectra</h1>
+
+    <div class="letter-content">
+        <h2>{{ titulo }}</h2>
+        <h3>{{ subtitulo }}</h3>
+        <p>{{ contenido }}</p>
+    </div>
+
+    <a href="{{ url_for('inicio') }}" class="back-button">Volver al Inicio</a>
+
 </body>
 </html>
+
 
 
