@@ -732,9 +732,8 @@ def weekly():
     else:
         return render_template('weekly.html', titulo="Aún no hay contenido", subtitulo="", contenido="La carta de esta semana aún no ha sido generada.")
 
-@app.before_first_request
-def run_weekly_letter():
-    print("🔹 Ejecutando Weekly Letter al recibir la primera solicitud...")
+with app.app_context():
+    print("🔹 Ejecutando Weekly Letter al iniciar la app...")
     generar_weekly_letter()
 
 
