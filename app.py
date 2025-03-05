@@ -265,7 +265,7 @@ def ejecutar_tarea_semanal():
     """Ejecuta la generación de Weekly Letter cada semana automáticamente."""
     while True:
         generar_weekly_letter()
-        time.sleep(604800)  # 7 días en segundos (1 semana)
+        time.sleep(120)  # 7 días en segundos (1 semana)
 
 
 
@@ -731,10 +731,6 @@ def weekly():
         return render_template('weekly.html', titulo=weekly_letter['titulo'], subtitulo=weekly_letter['subtitulo'], contenido=weekly_letter['contenido'])
     else:
         return render_template('weekly.html', titulo="Aún no hay contenido", subtitulo="", contenido="La carta de esta semana aún no ha sido generada.")
-@app.route('/generar_carta')
-def generar_carta():
-    generar_weekly_letter()
-    return "✅ Weekly Letter generada manualmente."
 
 
 
