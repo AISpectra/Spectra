@@ -5,48 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Política de Privacidad</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        /* Reset básico */
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
-        h1 {
+
+        /* Fondo con degradado */
+        body {
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinea el contenido en la parte superior */
+            min-height: 100vh; /* Asegura que ocupe toda la pantalla */
+            padding: 20px;
+            overflow-y: auto; /* Permite desplazarse si el contenido es largo */
+        }
+
+
+        /* Contenedor principal */
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
             text-align: center;
         }
-        .content {
-            margin: 20px auto;
-            max-width: 800px;
+
+        /* Estilos de los títulos */
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #00c6ff, #0094cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
         }
-        p {
+
+        h2 {
+            color: #00c6ff;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
             text-align: justify;
         }
-        form {
-            text-align: center;
+
+        h3 {
+            color: #00c6ff;
             margin-top: 20px;
+            text-align: justify;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 32px;
+
+        /* Texto en párrafos */
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+
+        /* Ajuste de listas */
+        ul {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: justify;
+            margin-bottom: 15px;
+            padding-left: 20px; /* Agregamos espacio a la izquierda */
+        }
+
+
+        /* Botones */
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
+            transition: all 0.3s ease-in-out;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .accept-btn {
+            background: #00c6ff;
+            color: white;
         }
+
+        .accept-btn:hover {
+            background: #0094cc;
+            transform: scale(1.05);
+        }
+
         .close-btn {
-            background-color: #f44336;
+            background: #f44336;
+            color: white;
+            margin-top: 10px;
         }
+
         .close-btn:hover {
-            background-color: #d32f2f;
+            background: #d32f2f;
+            transform: scale(1.05);
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                width: 90%;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            p {
+                font-size: 1rem;
+            }
+        }
+
+        /* Estilos para los enlaces */
+        a {
+            color: #00c6ff; /* Azul brillante */
+            text-decoration: none; /* Quitar subrayado */
+            font-weight: bold; /* Hacerlo más visible */
+        }
+
+        a:hover {
+            text-decoration: underline; /* Subrayado cuando pasas el mouse */
+        }
+
+
+
+
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .container {
+            animation: fadeIn 1s ease-in-out;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Política de Privacidad</h1>
-    <div class="content">
+    
+    <div class="container">
+        <h1>Política de Privacidad</h1>
         <p>Tu privacidad es importante para nosotros...</p>
         <h2>Política de Privacidad de Spectra</h2>
         <p>Última actualización: 25/11/2024</p>
@@ -80,17 +194,18 @@
 
         <h3>7. Contacto</h3>
         <p>Si tienes alguna pregunta sobre nuestra Política de Privacidad, por favor contáctanos a <a href="mailto:spectra.gethelp@gmail.com">spectra.gethelp@gmail.com</a>.</p>
-    </div>
     
     
-    {% if show_accept %}
+    
+      {% if show_accept %}
         <form method="POST" action="{{ url_for('accept_privacy') }}">
-            <button type="submit">Aceptar Política de Privacidad</button>
+            <button class="btn accept-btn" type="submit">Aceptar Política de Privacidad</button>
         </form>
-    {% endif %}
+      {% endif %}
     
-    <div style="text-align: center; margin-top: 10px;">
-        <button class="close-btn" onclick="window.history.back();">Cerrar</button>
+      <div style="text-align: center; margin-top: 10px;">
+        <button class="btn close-btn" onclick="window.history.back();">Cerrar</button>
+      </div>
     </div>
 
 </body>
