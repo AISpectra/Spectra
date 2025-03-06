@@ -56,131 +56,25 @@
             50% { transform: translateY(-50px); opacity: 1; }
             100% { transform: translateY(0px); opacity: 0.5; }
         }
-        
-
-        /* Menú desplegable */
-        .dropdown {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
-
-        .dropdown button {
-            background-color: #00c6ff;
-            color: white;
-            padding: 12px 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.3s ease;
-            box-shadow: 0px 4px 10px rgba(0, 198, 255, 0.5);
-        }
-
-        .dropdown button:hover {
-            background-color: #0094cc;
-            transform: scale(1.1);
-        }
-
-        .dropbtn:focus {
-            outline: none;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background: rgba(0, 198, 255, 0.9);
-            min-width: 180px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            z-index: 1001;
-            overflow: hidden;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .dropdown-content a,
-        .dropdown-content button {
-            color: white;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 16px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            text-align: left;
-        }
-
-        .dropdown-content a:hover,
-        .dropdown-content button:hover {
-            background-color: #0056b3;
-        }
-
-        .controls button {
-            background-color: #4A90E2; /* Azul brillante */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .controls button:hover {
-            background-color: #357ABD; /* Azul más oscuro en hover */
-            transform: scale(1.05); /* Pequeño zoom en hover */
-        }
-
-        .controls button:active {
-            transform: scale(0.95); /* Efecto de presionado */
-        }
-
     </style>
 </head>
 <body>
-
-    <!-- Menú desplegable -->
-    <div class="dropdown">
-        <button>Menú</button>
-        <div class="dropdown-content">
-            <a href="{{ url_for('weekly') }}">Weekly Letter</a>
-            <a href="{{ url_for('chat') }}">Ir al Chat</a>
-            <a href="{{ url_for('suscripcion') }}">Suscripción</a>
-            <a href="{{ url_for('privacy') }}">Política de Privacidad</a>
-            <a href="{{ url_for('inicio') }}">Inicio</a>
-            <form method="POST" action="{{ url_for('logout') }}" id="logout-btn">
-                <button type="submit">Cerrar sesión</button>
-            </form>
-        </div>
-    </div>
     <div class="particles"></div>
     <div class="container">
         <div class="circle" id="breathingCircle"></div>
         <div class="text" id="breathText">Prepárate para empezar...</div>
         <div class="controls">
-            <button id="pauseButton">▶️ Iniciar</button>
+            <button id="pauseButton">⏸ Pausar/Reanudar</button>
             <button id="restartButton">🔄 Reiniciar</button>
             <button id="voiceButton">🔊 Narración: Activada</button>
         </div>
     </div>
     
     <audio id="backgroundMusic" loop>
-        <source src="https://slvnmznxhwrvcyzioajl.supabase.co/storage/v1/object/public/Spectra-files//The%20Deepest%20Ocean.mp3" type="audio/mpeg">
+        <source src="background_music.mp3" type="audio/mpeg">
         Tu navegador no soporta el audio.
     </audio>
-
-    <audio id="voiceGuide">
-        <source src="static/audio/respiracion_guiada.mp3" type="audio/mpeg">
-        Tu navegador no soporta el audio.
-    </audio>
-
+    
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const breathText = document.getElementById("breathText");
@@ -189,9 +83,8 @@
             const pauseButton = document.getElementById("pauseButton");
             const restartButton = document.getElementById("restartButton");
             const voiceButton = document.getElementById("voiceButton");
-            const voiceGuide = document.getElementById("voiceGuide");
 
-            let isPaused = true;
+            let isPaused = false;
             let isVoiceEnabled = true;
             let index = 0;
 
@@ -207,19 +100,15 @@
                 { text: "Cuando estés listo, abre los ojos y continúa con calma.", duration: 4000 }
             ];
 
-
-            function playVoiceGuide() {
-                voiceGuide.currentTime = 0; // Reinicia el audio
-                voiceGuide.play();
-            }
-
             function updateText() {
                 if (index < script.length && !isPaused) {
                     breathText.innerText = script[index].text;
                     if (script[index].action) {
                         applyAnimation(script[index].action);
                     }
-                    
+                    if (isVoiceEnabled) {
+                        speakText(script[index].text);
+                    }
                     setTimeout(() => {
                         if (!isPaused) {
                             index++;
@@ -241,28 +130,38 @@
                 }
             }
 
+            function speakText(text) {
+                if (isVoiceEnabled) {
+                    let speech = new SpeechSynthesisUtterance(text);
+                    speech.voice = speechSynthesis.getVoices().find(voice => voice.name === "Google Español de España"); // Ajusta el nombre de la voz
+                    speech.rate = 0.9;
+                    speech.pitch = 1;
+                    speech.volume = 0.8;
+                    speech.lang = 'es-ES';
+                    speechSynthesis.speak(speech);
+                }
+            }
+
             function togglePause() {
                 isPaused = !isPaused;
-                if (!isPaused) {
-                    voiceGuide.play();  // ✅ Solo reproduce si estaba en pausa
-                    backgroundMusic.play();
-                    updateText();
-                    pauseButton.innerText = "⏸ Pausar";
-                } else {
-                    voiceGuide.pause();
-                    
+                if (isPaused) {
+                    speechSynthesis.pause();
                     backgroundMusic.pause();
                     pauseButton.innerText = "▶️ Reanudar";
+                } else {
+                    speechSynthesis.resume();
+                    backgroundMusic.play();
+                    pauseButton.innerText = "⏸ Pausar";
+                    updateText();
                 }
             }
 
             function toggleVoice() {
                 isVoiceEnabled = !isVoiceEnabled;
                 if (isVoiceEnabled) {
-                    voiceGuide.play();
                     voiceButton.innerText = "🔊 Narración: Activada";
                 } else {
-                    voiceGuide.pause();
+                    speechSynthesis.cancel();
                     voiceButton.innerText = "🔇 Narración: Desactivada";
                 }
             }
@@ -270,14 +169,10 @@
             function restartSession() {
                 index = 0;
                 isPaused = false;
-                voiceGuide.pause();
-                voiceGuide.currentTime = 0;
+                speechSynthesis.cancel();
                 backgroundMusic.play();
                 pauseButton.innerText = "⏸ Pausar";
                 updateText();
-                if (isVoiceEnabled) {
-                    voiceGuide.play();
-                }
             }
 
             pauseButton.addEventListener("click", togglePause);
@@ -285,7 +180,7 @@
             voiceButton.addEventListener("click", toggleVoice);
 
             updateText();
-            
+            backgroundMusic.play();
             
             // Generar partículas flotantes
             const particleContainer = document.querySelector(".particles");
@@ -297,6 +192,7 @@
                 particle.style.animationDuration = (Math.random() * 8 + 5) + "s";
                 particleContainer.appendChild(particle);
             }
+            
         });
     </script>
 </body>
