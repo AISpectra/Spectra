@@ -381,9 +381,28 @@ def forgot_password():
             reset_url = url_for('reset_password', token=token, _external=True)
 
             # Enviar el correo de recuperación
-            msg = Message('Recuperación de contraseña',
-                          recipients=[email],
-                          body=f'Para cambiar tu contraseña, haz clic en el siguiente enlace: {reset_url}')
+            msg = Message('Restablece tu contraseña en Spectra', recipients=[email])
+            msg.html = f"""msg.html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {{ font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }}
+                    .container {{ max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }}
+                    .button {{ background: #00c6ff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 15px; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>Restablece tu contraseña</h2>
+                    <p>Parece que solicitaste un cambio de contraseña. Haz clic en el botón de abajo para continuar:</p>
+                    <a href="{reset_url}" class="button">Restablecer Contraseña</a>
+                    <p>Si no solicitaste este cambio, ignora este mensaje.</p>
+                    <p>Atentamente,<br>El equipo de Spectra</p>
+                </div>
+            </body>
+            </html>
+            """
             mail.send(msg)
 
             flash('Te hemos enviado un enlace para recuperar tu contraseña.', 'info')
