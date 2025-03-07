@@ -331,7 +331,27 @@ def register():
         token = serializer.dumps(email, salt="email-confirm")
         confirm_url = url_for('confirm_email', token=token, _external=True)
         msg = Message('Confirma tu correo electrónico', recipients=[email])
-        msg.body = f'Haz clic en el siguiente enlace para confirmar tu correo electrónico: {confirm_url}'
+        msg.html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }}
+                .container {{ max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }}
+                .button {{ background: #00c6ff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 15px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>¡Bienvenido a Spectra!</h2>
+                <p>Gracias por registrarte. Para activar tu cuenta, haz clic en el botón de abajo:</p>
+                <a href="{confirm_url}" class="button">Confirmar Cuenta</a>
+                <p>Si no solicitaste este registro, ignora este mensaje.</p>
+                <p>Atentamente,<br>El equipo de Spectra</p>
+            </div>
+        </body>
+        </html>
+        """
         mail.send(msg)
 
         
