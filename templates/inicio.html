@@ -90,7 +90,7 @@
             border-radius: 15px;
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
-            text-align: justify;
+            text-align: center; /* Centra el título y el contenido */
             animation: slideUp 1s ease-in-out;
         }
 
@@ -98,8 +98,16 @@
             color: #00c6ff;
             text-transform: uppercase;
             margin-bottom: 15px;
-            font-size: 1.8rem;
+            font-size: 2rem;
         }
+        
+        .content p {
+            text-align: center; /* Centra el título y el contenido */
+            margin-bottom: 15px; /* Añade espacio entre los párrafos */
+            line-height: 1.6; /* Hace que el texto sea más legible */
+            font-size: 1.3rem;
+        }
+
 
         /* Pie de página */
         .footer {
@@ -126,6 +134,65 @@
         .secondary-button:hover {
             box-shadow: 0px 0px 20px rgba(255, 94, 0, 0.8);
         }
+
+        /* Estilos para la sección de Beneficios */
+        .benefits {
+            text-align: center;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .benefit-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 198, 255, 0.3);
+        }
+
+        .benefit-item img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .benefit-item p {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #00c6ff;
+        }
+
+
+        .attributions {
+            font-size: 0.8rem; /* Hace que el texto sea más pequeño */
+            opacity: 0.6; /* Reduce la visibilidad sin ocultarlo */
+            text-align: center; /* Lo centra en la página */
+            margin-top: 20px;
+        }
+
+        .attributions a {
+            color: #00c6ff; /* Color discreto */
+            text-decoration: none;
+        }
+
+        .attributions a:hover {
+            text-decoration: underline;
+        }
+
+
 
     </style>
 
@@ -176,18 +243,64 @@
         </p>
     </div>
 
+    <!-- Sección de Beneficios -->
+    <div class="content benefits">
+        <h2>Beneficios de usar Spectra</h2>
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <img src="{{ url_for('static', filename='icons/chat.png') }}" alt="Apoyo emocional">
+                <p>Apoyo emocional 24/7</p>
+            </div>
+            <div class="benefit-item">
+                <img src="{{ url_for('static', filename='icons/confidencial.png') }}" alt="Confidencialidad">
+                <p>Conversaciones 100% confidenciales</p>
+            </div>
+            <div class="benefit-item">
+                <img src="{{ url_for('static', filename='icons/relax.png') }}" alt="Ejercicios de relajación">
+                <p>Ejercicios de relajación guiados</p>
+            </div>
+            <div class="benefit-item">
+                <img src="{{ url_for('static', filename='icons/ai.png') }}" alt="Inteligencia artificial avanzada">
+                <p>IA avanzada para entenderte mejor</p>
+            </div>
+            <div class="benefit-item">
+                <img src="{{ url_for('static', filename='icons/free.png') }}" alt="Gratis">
+                <p>Opción gratuita disponible</p>
+            </div>
+            <div class="benefit-item">
+                <img src="{{ url_for('static', filename='icons/customize.png') }}" alt="Personalización">
+                <p>Experiencia personalizada</p>
+            </div>
+        </div>
+    </div>
+
+
     <div class="content">
-        <h2>Sobre el creador</h2>
+        <h2>Sobre Nosotros</h2>
         <p>
-            Spectra fue desarrollado por Samuel Expósito, un apasionado de la tecnología y el bienestar mental.
-            Con un enfoque en la empatía y la innovación, Spectra busca ser un recurso valioso para mejorar la
-            calidad de vida de las personas a través de la inteligencia artificial.
+            Spectra nació con la idea de ofrecer un espacio seguro y accesible para quienes necesitan apoyo emocional.
+            Nuestro objetivo es proporcionar acompañamiento sin juicios, ayudando a gestionar el estrés, la ansiedad y
+            otros desafíos emocionales del día a día.
+        </p>
+        <p>
+            Creemos que la inteligencia artificial puede ser una herramienta poderosa para el bienestar. Por eso,
+            combinamos empatía y tecnología para que Spectra sea más que una simple inteligencia artificial, que sea un verdadero compañero de apoyo emocional.
+        </p>
+        <p>
+            Estamos comprometidos con mejorar constantemente Spectra, agregando nuevas funciones y optimizando la
+            experiencia para que cada usuario se sienta escuchado y comprendido.
         </p>
     </div>
+
 
     <!-- Pie de página -->
     <div class="footer">
         <p>Contacto: <a href="mailto:spectra.gethelp@gmail.com" style="color: #00c6ff;">spectra.gethelp@gmail.com</a></p>
+    </div>
+
+    <!-- Atribuciones -->
+    <div class="attributions">
+        <p>Iconos proporcionados por <a href="https://www.flaticon.com/" target="_blank">Flaticon</a></p>
     </div>
 
 </body>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8748299404806145"
+     crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='spectra.png') }}">
+    <title>Bienvenido a Spectra</title>
+    
+    <style>
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Encabezado animado */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            animation: fadeIn 1.2s ease-in-out;
+            text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.6);
+        }
+
+        .hero h2 {
+            font-size: 2rem;
+            font-weight: normal;
+            margin-top: 15px;
+            opacity: 0.9;
+            animation: fadeIn 1.8s ease-in-out;
+        }
+
+        /* Botón principal con animación */
+        .start-button {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            padding: 18px 40px;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .start-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 0px 20px rgba(0, 198, 255, 0.8);
+        }
+
+        /* Sección de Beneficios */
+        .benefits-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 50px auto;
+        }
+
+        .benefit {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            width: 280px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .benefit:hover {
+            transform: scale(1.05);
+        }
+
+        .benefit img {
+            width: 50px;
+            margin-bottom: 15px;
+        }
+
+        .benefit h3 {
+            font-size: 1.4rem;
+            color: #00c6ff;
+        }
+
+        /* Contenedor de contenido */
+        .content {
+            margin: 40px auto;
+            max-width: 900px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+            text-align: justify;
+            animation: slideUp 1s ease-in-out;
+        }
+
+        .content h2 {
+            color: #00c6ff;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        /* Pie de página */
+        .footer {
+            margin-top: 50px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- Sección de bienvenida animada -->
+    <div class="hero">
+        <h1>Bienvenido a Spectra</h1>
+        <h2>Tu espacio para el bienestar emocional</h2>
+        <a href="{{ url_for('login') }}" class="start-button">Comenzar con Spectra</a>
+        <a href="{{ url_for('suscription2') }}" class="start-button secondary-button">Consultar Precios</a>
+    </div>
+
+    <!-- Sección de Beneficios -->
+    <div class="content">
+        <h2>Beneficios de Spectra</h2>
+        <div class="benefits-container">
+            <div class="benefit">
+                <img src="{{ url_for('static', filename='icons/empathy.png') }}" alt="Empatía">
+                <h3>Soporte Emocional</h3>
+                <p>Un chatbot diseñado para escuchar y comprender tus emociones sin juicios.</p>
+            </div>
+            <div class="benefit">
+                <img src="{{ url_for('static', filename='icons/confidential.png') }}" alt="Confidencialidad">
+                <h3>Privacidad Total</h3>
+                <p>Tus conversaciones son seguras y confidenciales.</p>
+            </div>
+            <div class="benefit">
+                <img src="{{ url_for('static', filename='icons/tools.png') }}" alt="Herramientas">
+                <h3>Herramientas de Autoayuda</h3>
+                <p>Ejercicios de relajación y meditación guiada integrados.</p>
+            </div>
+            <div class="benefit">
+                <img src="{{ url_for('static', filename='icons/24h.png') }}" alt="Disponibilidad">
+                <h3>Disponible 24/7</h3>
+                <p>Habla con Spectra en cualquier momento del día.</p>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Sobre Nosotros -->
+    <div class="content">
+        <h2>Sobre Nosotros</h2>
+        <p>
+            Spectra nació como una iniciativa para ofrecer un espacio seguro y accesible para la salud emocional.
+            Nos dimos cuenta de que muchas personas necesitan hablar con alguien en momentos difíciles, pero no siempre tienen a alguien disponible.
+            Por eso, decidimos combinar la inteligencia artificial con el apoyo emocional, creando un chatbot que pudiera ayudar en esos momentos de soledad o estrés.
+        </p>
+        <p>
+            Nuestra misión es hacer que el bienestar mental sea accesible para todos, ofreciendo herramientas y apoyo emocional en cualquier momento del día.
+        </p>
+    </div>
+
+    <!-- Pie de página -->
+    <div class="footer">
+        <p>Contacto: <a href="mailto:spectra.gethelp@gmail.com" style="color: #00c6ff;">spectra.gethelp@gmail.com</a></p>
+    </div>
+
+</body>
+</html>
