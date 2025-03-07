@@ -382,14 +382,35 @@ def forgot_password():
 
             # Enviar el correo de recuperación
             msg = Message('Restablece tu contraseña en Spectra', recipients=[email])
-            msg.html = f"""msg.html = f"""
+            msg.html = f"""
             <!DOCTYPE html>
             <html>
             <head>
                 <style>
-                    body {{ font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }}
-                    .container {{ max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }}
-                    .button {{ background: #00c6ff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 15px; }}
+                    body {{ 
+                      font-family: Arial, sans-serif; 
+                      text-align: center;
+                      background: #f4f4f4; 
+                      padding: 20px; 
+                    }}
+                    .container {{ 
+                      max-width: 600px;
+                      margin: auto; 
+                      background: white; 
+                      padding: 20px; 
+                      border-radius: 10px;
+                      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+                    }}
+                    .button {{ 
+                      background: #00c6ff; 
+                      color: white; 
+                      padding: 12px 20px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-weight: bold; 
+                      display: inline-block; 
+                      margin-top: 15px; 
+                    }}
                 </style>
             </head>
             <body>
