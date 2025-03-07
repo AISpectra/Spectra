@@ -23,6 +23,22 @@
             position: relative;
             z-index: 2;
         }
+        .bottom-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto; /* Cambiado de 100% a auto para que no bloquee todo */
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0); /* Para hacerlo más sutil */
+            border-radius: 10px; 
+            z-index: 2;   
+            pointer-events: auto; /* Bloquea clics en el contenedor */
+        }
+
+
+
         .circle {
             width: 100px;
             height: 100px;
@@ -133,6 +149,7 @@
             cursor: pointer;
             transition: background 0.3s, transform 0.2s;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
         }
 
         .controls button:hover {
@@ -143,6 +160,14 @@
         .controls button:active {
             transform: scale(0.95); /* Efecto de presionado */
         }
+
+        .music-attribution {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-top: 10px;
+        }
+
 
     </style>
 </head>
@@ -165,12 +190,18 @@
     <div class="particles"></div>
     <div class="container">
         <div class="circle" id="breathingCircle"></div>
+    </div>
+    <div class="bottom-container">
         <div class="text" id="breathText">Prepárate para empezar...</div>
         <div class="controls">
             <button id="pauseButton">▶️ Iniciar</button>
             <button id="restartButton">🔄 Reiniciar</button>
             <button id="voiceButton">🔊 Narración: Activada</button>
         </div>
+        <div class="music-attribution">
+            <p>Música: <em>El Océano Más Profundo</em> - <a href="https://www.fiftysounds.com/es/" target="_blank">FiftySounds</a></p>
+        </div>
+
     </div>
     
     <audio id="backgroundMusic" loop>
@@ -198,8 +229,8 @@
             let index = 0;
 
             const script = [
-                { text: "Bienvenido a esta sesión de respiración guiada. Encuentra un lugar cómodo, cierra los ojos por un momento y relaja los hombros", duration: 5000 },
-                { text: "Cuando estés listo, abre los ojos y sigue el ritmo de la bola para respirar conscientemente", duration: 5000 },
+                { text: "Bienvenido a esta sesión de respiración guiada. Encuentra un lugar cómodo, sientate y relaja los hombros", duration: 6000 },
+                { text: "Cuando estés listo sigue el ritmo de la bola para respirar conscientemente", duration: 5000 },
                 { text: "Inhala lenta y profundamente por la nariz... siente cómo el aire llena tus pulmones", duration: 4000, action: 'inhale' },
                 { text: "Sostén la respiración... disfruta de la calma que fluye en tu cuerpo", duration: 4000, action: 'hold' },
                 { text: "Suelta el aire lentamente por la boca… liberando cualquier tensión o estrés", duration: 6000, action: 'exhale' },
