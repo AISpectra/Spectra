@@ -22,7 +22,7 @@ import time
 PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
 PAYPAL_SECRET = os.getenv("PAYPAL_SECRET")
 PAYPAL_PLAN_ID = os.getenv("PAYPAL_PLAN_ID")
-PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"  # Usa "api-m.paypal.com" en producción.
+PAYPAL_BASE_URL = "https://api-m.paypal.com"  # Usa "api-m.paypal.com" en producción.
 
 def get_paypal_access_token():
     url = f"{PAYPAL_BASE_URL}/v1/oauth2/token"
