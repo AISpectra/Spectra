@@ -28,7 +28,7 @@
             bottom: 10px;
             left: 0;
             
-            width: 99%; /* Cambiado de 100% a auto para que no bloquee todo */
+            width: 100%; /* Cambiado de 100% a auto para que no bloquee todo */
             text-align: center;
             padding: 10px;
             background: rgba(0, 0, 0, 0); /* Para hacerlo más sutil */
@@ -203,9 +203,9 @@
     <div class="bottom-container">
         <div class="text" id="breathText">Prepárate para empezar...</div>
         <div class="controls">
-            <button id="pauseButton">▶️ Iniciar</button>
-            <button id="restartButton">🔄 Reiniciar</button>
-            <button id="voiceButton">🔊 Narración: Activada</button>
+            <button id="pauseButton">▶️</button>
+            <button id="restartButton">🔄</button>
+            <button id="voiceButton">🔊</button>
         </div>
         <div class="music-attribution">
             <p>Música: <em>El Océano Más Profundo</em> - <a href="https://www.fiftysounds.com/es/" target="_blank">FiftySounds</a></p>
@@ -254,7 +254,7 @@
                 { text: "Observa cómo te sientes ahora, más presente y relajado", duration: 4000 },
                 { text: "Inhala una vez más, llenando tu cuerpo de energía positiva", duration: 4000, action: 'inhale' },
                 { text: "Deja que la calma se expanda en ti", duration: 6000, action: 'exhale' },
-                { text: "Cuando estés listo, abre los ojos y sigue tu día con tranquilidad y claridad", duration: 6000 },
+                { text: "Cuando estés listo, levantate y sigue tu día con tranquilidad y claridad", duration: 6000 },
             ];
 
 
@@ -297,12 +297,12 @@
                     voiceGuide.play();  // ✅ Solo reproduce si estaba en pausa
                     backgroundMusic.play();
                     updateText();
-                    pauseButton.innerText = "⏸ Pausar";
+                    pauseButton.innerText = "⏸";
                 } else {
                     voiceGuide.pause();
                     
                     backgroundMusic.pause();
-                    pauseButton.innerText = "▶️ Reanudar";
+                    pauseButton.innerText = "▶️";
                 }
             }
 
@@ -310,10 +310,12 @@
                 isVoiceEnabled = !isVoiceEnabled;
                 if (isVoiceEnabled) {
                     voiceGuide.play();
-                    voiceButton.innerText = "🔊 Narración: Activada";
+                    backgroundMusic.play();
+                    voiceButton.innerText = "🔊";
                 } else {
                     voiceGuide.pause();
-                    voiceButton.innerText = "🔇 Narración: Desactivada";
+                    backgroundMusic.pause();
+                    voiceButton.innerText = "🔇";
                 }
             }
 
@@ -323,7 +325,7 @@
                 voiceGuide.pause();
                 voiceGuide.currentTime = 0;
                 backgroundMusic.play();
-                pauseButton.innerText = "⏸ Pausar";
+                pauseButton.innerText = "⏸";
                 updateText();
                 if (isVoiceEnabled) {
                     voiceGuide.play();
