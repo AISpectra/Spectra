@@ -753,6 +753,11 @@ def suscripcion_cancelada():
     flash("La suscripción fue cancelada.", "danger")
     return redirect(url_for('suscripcion'))
 
+@app.route('/popit')
+@login_required
+def popit():
+    return render_template('popit.html')
+
 @app.route('/cancelar_suscripcion', methods=['POST'])
 @login_required
 def cancelar_suscripcion():

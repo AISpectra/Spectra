@@ -246,6 +246,9 @@
           {% if subscription != 'free' %}
           <a href="{{ url_for('respiracion') }}">Respiración Guiada</a>
           {% endif %}
+          {% if subscription != 'free' %}
+          <a href="{{ url_for('popit') }}">Respiración Guiada</a>
+          {% endif %}
   	  <form method="POST" action="{{ url_for('logout') }}" id="logout-btn">
              <button type="submit">Cerrar sesión</button>
   	  </form>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pop It Interactivo - Spectra</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+    /* Estilos para el menú desplegable */
+    .dropdown {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+    }
+    .dropdown button {
+      padding: 10px 15px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      padding: 10px 0;
+      border-radius: 3px;
+    }
+    .dropdown-content a, .dropdown-content form button {
+      color: #333;
+      padding: 8px 16px;
+      text-decoration: none;
+      display: block;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .dropdown-content a:hover, .dropdown-content form button:hover {
+      background-color: #f1f1f1;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    /* Contenedor de burbujas */
+    #bubble-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+    }
+    #restart-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #ffffff;
+      border: 2px solid #fed6e3;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Menú desplegable -->
+  <div class="dropdown">
+    <button>Menú</button>
+    <div class="dropdown-content">
+      <a href="{{ url_for('weekly') }}">Weekly Letter</a>
+      <a href="{{ url_for('chat') }}">Ir al Chat</a>
+      <a href="{{ url_for('suscripcion') }}">Suscripción</a>
+      <a href="{{ url_for('privacy') }}">Política de Privacidad</a>
+      <a href="{{ url_for('inicio') }}">Inicio</a>
+      <form method="POST" action="{{ url_for('logout') }}" id="logout-btn">
+        <button type="submit">Cerrar sesión</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Contenedor de burbujas -->
+  <div id="bubble-container"></div>
+  
+  <!-- Audio para el sonido de pop -->
+  <audio id="pop-sound" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" preload="auto"></audio>
+
+  <script>
+    const container = document.getElementById("bubble-container");
+    const popSound = document.getElementById("pop-sound");
+    const initialBubbleCount = 20;
+
+    // Función para generar un número aleatorio en un rango
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    // Crea una burbuja con propiedades aleatorias
+    function createBubble() {
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble");
+      
+      // Tamaño aleatorio entre 30 y 100px
+      const size = random(30, 100);
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      
+      // Posición aleatoria dentro del contenedor
+      const posX = random(0, window.innerWidth - size);
+      const posY = random(0, window.innerHeight - size);
+      bubble.style.left = `${posX}px`;
+      bubble.style.top = `${posY}px`;
+      
+      // Color de fondo aleatorio en tonos suaves
+      const r = Math.floor(random(200, 255));
+      const g = Math.floor(random(200, 255));
+      const b = Math.floor(random(200, 255));
+      bubble.style.background = `rgba(${r}, ${g}, ${b}, 0.8)`;
+
+      // Evento para explotar la burbuja
+      bubble.addEventListener("click", function() {
+        popSound.currentTime = 0;
+        popSound.play();
+        bubble.style.transform = "scale(1.5)";
+        bubble.style.opacity = "0";
+        setTimeout(() => {
+          bubble.remove();
+          // Si ya no quedan burbujas, mostrar botón de reiniciar
+          if (container.childElementCount === 0) {
+            showRestartButton();
+          }
+        }, 200);
+      });
+
+      container.appendChild(bubble);
+    }
+
+    // Crear las burbujas iniciales
+    function createInitialBubbles() {
+      for (let i = 0; i < initialBubbleCount; i++) {
+        createBubble();
+      }
+    }
+
+    // Mostrar botón de reinicio cuando se han explotado todas las burbujas
+    function showRestartButton() {
+      const btn = document.createElement("button");
+      btn.id = "restart-btn";
+      btn.innerText = "Reiniciar";
+      btn.addEventListener("click", function() {
+        btn.remove();
+        createInitialBubbles();
+      });
+      document.body.appendChild(btn);
+    }
+
+    // Inicializar
+    createInitialBubbles();
+
+    // Reiniciar burbujas al redimensionar la ventana
+    window.addEventListener("resize", function() {
+      container.innerHTML = "";
+      const btn = document.getElementById("restart-btn");
+      if(btn) btn.remove();
+      createInitialBubbles();
+    });
+  </script>
+</body>
+</html>
+
