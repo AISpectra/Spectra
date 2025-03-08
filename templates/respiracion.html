@@ -25,14 +25,14 @@
         }
         .bottom-container {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: auto; /* Cambiado de 100% a auto para que no bloquee todo */
+            bottom: 10px;
+            left: 0;
+            
+            width: 100%; /* Cambiado de 100% a auto para que no bloquee todo */
             text-align: center;
             padding: 10px;
             background: rgba(0, 0, 0, 0); /* Para hacerlo más sutil */
-            border-radius: 10px; 
+            border-radius: 0px; 
             z-index: 2;   
             pointer-events: auto; /* Bloquea clics en el contenedor */
         }
@@ -47,12 +47,21 @@
             margin: 20px auto;
         }
         .text {
-            font-size: 24px;
-            margin-top: 20px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            max-width: 100%; /* Evita que el texto se corte en pantallas pequeñas */
+            word-wrap: break-word; /* Permite que las palabras largas se rompan en otra línea */
         }
+
         .controls {
-            margin-top: 20px;
+            display: flex;
+            justify-content: center; /* Centra los botones horizontalmente */
+            gap: 10px; /* Espaciado entre los botones */
+            width: 100%;
+            max-width: 600px; /* Limita el ancho de los botones */
+            margin: auto;
         }
+
         .particles {
             position: absolute;
             width: 100vw;
