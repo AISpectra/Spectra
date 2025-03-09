@@ -12,47 +12,59 @@
       font-family: Arial, sans-serif;
       position: relative;
     }
-    /* Estilos para el menú desplegable */
+    /* Menú desplegable: estilos actualizados según tu ejemplo */
     .dropdown {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 20px;
+      left: 20px;
       z-index: 1000;
     }
     .dropdown button {
-      padding: 10px 15px;
-      font-size: 1em;
+      background-color: #00c6ff;
+      color: white;
+      padding: 12px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
       cursor: pointer;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 3px;
+      transition: background 0.3s ease, transform 0.3s ease;
+      box-shadow: 0px 4px 10px rgba(0, 198, 255, 0.5);
+    }
+    .dropdown button:hover {
+      background-color: #0094cc;
+      transform: scale(1.1);
+    }
+    .dropdown button:focus {
+      outline: none;
     }
     .dropdown-content {
       display: none;
       position: absolute;
-      background-color: #fff;
-      min-width: 160px;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-      padding: 10px 0;
-      border-radius: 3px;
-    }
-    .dropdown-content a, .dropdown-content form button {
-      color: #333;
-      padding: 8px 16px;
-      text-decoration: none;
-      display: block;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-      cursor: pointer;
-      font-size: 0.9em;
-    }
-    .dropdown-content a:hover, .dropdown-content form button:hover {
-      background-color: #f1f1f1;
+      background: rgba(0, 198, 255, 0.9);
+      min-width: 180px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      z-index: 1001;
+      overflow: hidden;
     }
     .dropdown:hover .dropdown-content {
       display: block;
+    }
+    .dropdown-content a,
+    .dropdown-content button {
+      color: white;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      font-size: 16px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      text-align: left;
+    }
+    .dropdown-content a:hover,
+    .dropdown-content button:hover {
+      background-color: #0056b3;
     }
     /* Contenedor de burbujas */
     #bubble-container {
@@ -67,6 +79,9 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       cursor: pointer;
       transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+      /* Tamaño mínimo aumentado para evitar burbujas muy pequeñas */
+      min-width: 40px;
+      min-height: 40px;
     }
     #restart-btn {
       position: absolute;
@@ -81,6 +96,13 @@
       cursor: pointer;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       z-index: 1000;
+    }
+    /* Ajustes para dispositivos móviles */
+    @media (max-width: 480px) {
+      #restart-btn {
+        padding: 20px 40px;
+        font-size: 1.4em;
+      }
     }
   </style>
 </head>
@@ -121,8 +143,8 @@
       const bubble = document.createElement("div");
       bubble.classList.add("bubble");
       
-      // Tamaño aleatorio entre 30 y 100px
-      const size = random(30, 100);
+      // Tamaño aleatorio entre 40 y 100px
+      const size = random(40, 100);
       bubble.style.width = `${size}px`;
       bubble.style.height = `${size}px`;
       
@@ -141,7 +163,7 @@
       // Evento para explotar la burbuja
       bubble.addEventListener("click", function() {
         popSound.currentTime = 0;
-        popSound.play();
+        popSound.play().catch(error => console.log("Error al reproducir el sonido:", error));
         bubble.style.transform = "scale(1.5)";
         bubble.style.opacity = "0";
         setTimeout(() => {
@@ -188,4 +210,3 @@
   </script>
 </body>
 </html>
-
