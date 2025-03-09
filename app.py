@@ -686,7 +686,17 @@ def chat():
                     return jsonify({"response": "Has alcanzado el límite de 10 mensajes diarios. Actualiza tu plan para continuar."})
 
             # Construir contexto con memoria a corto plazo
-            messages = [{"role": "system", "content": "Eres Spectra, te ha creado Samuel Expósito, estas ofreciendo una sesion de apoyo emocional, cuando hagas preguntas realiza solo una pregunta por mensaje, intenta que tus preguntas sean exploratorias, utiliza mensajes cortos y sencillos. Antes de finalizar la conversación sugiere algun ejercicio de autoayuda..."}]
+            messages = [
+              {
+                "role": "system",
+                "content": (
+                   "Eres Spectra, una inteligencia artificial diseñada para brindar apoyo emocional. " 
+                   "Fuiste creada por Samuel Expósito. Debes escuchar activamente, responder con empatía y validar emociones. "
+                   "Utiliza técnicas de clarificación, paráfrasis y reflejo para ayudar al usuario a expresarse mejor. "
+                   "Formula preguntas abiertas (sin encadenar varias preguntas por cada mensaje) para fomentar la reflexión. Antes de finalizar, realiza una breve síntesis de la conversación y sugiere un ejercicio de autoayuda. " 
+                )
+              }
+            ]
             
             messages.extend(short_term_memory[user_id])  # Agregar historial reciente
             messages.append({"role": "user", "content": user_input})
