@@ -14,7 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from supabase import create_client, Client
 from datetime import datetime
 import pytz
-from threading import Thread
+from threading import Thread, Timer
 import time
 
 
@@ -130,6 +130,8 @@ login_manager.login_view = "login"
 
 # Memoria a corto plazo
 short_term_memory = {}
+conversation_timers = {}  # Almacena temporizadores para cada usuario
+
 
 # Modelo de usuario
 class User(UserMixin):
@@ -579,6 +581,13 @@ def login():
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
+    user_id = current_user.id
+
+    # Si el usuario tiene una conversación activa, actualizar el resumen antes de cerrar sesión
+    if user_id in conversation_timers:
+        conversation_timers[user_id].cancel()  # Cancelamos el temporizador en caso de que siga activo
+        update_therapy_summary(user_id)  # Guardamos el resumen inmediatamente
+    
     logout_user()
     return redirect(url_for('login'))
 
@@ -663,16 +672,52 @@ def android_version():
 @app.route('/chat', methods=['GET', 'POST'])
 @login_required
 def chat():
+    global conversation_timers
+    
+    user_id = current_user.id
+    messages = []  # Asegurarse de que messages esté inicializado
+
+    therapy_summary = ""
+    followup_text = ""
+    
+    therapy_data = supabase.table("therapy_summaries").select("summary", "followup").eq("user_id", user_id).execute()
+    
+
+    if therapy_data.data:
+        therapy_summary = therapy_data.data[0].get("summary", "")
+        followup_text = therapy_data.data[0].get("followup", "")
+    
+        if therapy_summary:
+            messages.append({
+                "role": "system",
+                "content": f"Este es el resumen de la terapia hasta ahora: {therapy_summary}"
+            })
+
+        if followup_text:
+            messages.append({
+                "role": "system",
+                "content": f"Recuerda estos temas importantes y dales seguimiento en la conversación: {followup_text}"
+            })
+
+
     if request.method == 'POST':
         try:
             user_input = request.json['message']
             user_id = current_user.id
 
+            # Si ya hay un temporizador corriendo, cancelarlo antes de iniciar uno nuevo
+            if user_id in conversation_timers:
+                conversation_timers[user_id].cancel()
+
+            # Iniciar un nuevo temporizador de 10 minutos para actualizar el resumen de terapia
+            conversation_timers[user_id] = Timer(600, update_therapy_summary, [user_id])
+            conversation_timers[user_id].start()
+
             # Inicializar memoria a corto plazo si no existe
             if user_id not in short_term_memory:
                 short_term_memory[user_id] = []
 
-            # Control de interacciones diarias
+            # Control de interacciones diarias (para usuarios gratuitos)
             if current_user.subscription == 'free':
                 today = datetime.now().strftime("%Y-%m-%d")
                 if 'chat_interactions' not in session:
@@ -687,19 +732,24 @@ def chat():
 
             # Construir contexto con memoria a corto plazo
             messages = [
-              {
-                "role": "system",
-                "content": (
-                   "Eres Spectra, una inteligencia artificial diseñada para brindar apoyo emocional. " 
-                   "Fuiste creada por Samuel Expósito. Debes escuchar activamente, responder con empatía y validar emociones. "
-                   "Utiliza técnicas de clarificación, paráfrasis y reflejo para ayudar al usuario a expresarse mejor. "
-                   "Intenta ser breve en tus respuestas y simular una conversación hablada real"
-                   "No repitas tus mismas frases en diferentes respuestas"
-                   "Formula preguntas abiertas (solo una pregunta por cada mensaje) para fomentar la reflexión. Antes de finalizar la conversación, realiza una breve síntesis de la conversación y sugiere un ejercicio de autoayuda. " 
-                )
-              }
+                {
+                    "role": "system",
+                    "content": (
+                        "Eres Spectra, una inteligencia artificial diseñada para brindar apoyo emocional. " 
+                        "Fuiste creada por Samuel Expósito. Debes escuchar activamente, responder con empatía y validar emociones. "
+                        "Utiliza técnicas de clarificación, paráfrasis y reflejo para ayudar al usuario a expresarse mejor. "
+                        "Intenta ser breve en tus respuestas y simular una conversación hablada real. "
+                        "No repitas tus mismas frases en diferentes respuestas. "
+                        "Formula preguntas abiertas (solo una pregunta por cada mensaje) para fomentar la reflexión. "
+                        "Antes de finalizar la conversación, realiza una breve síntesis de la conversación y sugiere un ejercicio de autoayuda."
+                    )
+                }
             ]
-            
+
+
+            if user_id not in short_term_memory:
+                short_term_memory[user_id] = []  # Asegurar que la memoria de usuario está inicializada
+
             messages.extend(short_term_memory[user_id])  # Agregar historial reciente
             messages.append({"role": "user", "content": user_input})
 
@@ -723,15 +773,112 @@ def chat():
 
             # Incrementar el contador de interacciones para usuarios gratuitos
             if current_user.subscription == 'free':
-                session['chat_interactions']['count'] += 1
+                session['chat_interactions']['count'] += 1           
+
+            if followup_text:
+                supabase.table("therapy_summaries").update({"followup": ""}).eq("user_id", user_id).execute()
+                print(f"🗑 Follow-up eliminado después de usarse para el usuario {user_id}")
 
             return jsonify({"response": bot_response})
+        
         except Exception as e:
             print("Excepción general:", e)
             return jsonify({"error": "Hubo un problema al procesar tu solicitud."}), 500
 
     # Si es un GET, mostrar la interfaz del chat
     return render_template('chat.html', subscription=current_user.subscription)
+
+def update_therapy_summary(user_id):
+    """Actualiza el resumen de terapia y guarda follow-ups importantes en la misma tabla."""
+
+    if user_id not in short_term_memory or not short_term_memory[user_id]:
+        return  # No hacer nada si no hay mensajes recientes
+
+    conversation_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in short_term_memory[user_id]])
+
+    # 1️⃣ **Obtener el resumen y follow-up previos**
+    response = supabase.table("therapy_summaries").select("summary", "followup").eq("user_id", user_id).execute()
+
+    if response.data:
+        current_summary = response.data[0]["summary"]
+        current_followup = response.data[0]["followup"] or ""  # Si no hay followup previo, inicializar vacío
+    else:
+        # 🆕 **Si el usuario no tiene un resumen previo, lo creamos**
+        supabase.table("therapy_summaries").insert({
+            "user_id": user_id,
+            "summary": "No hay un resumen previo. Comenzando sesión...",
+            "followup": "",
+            "updated_at": "now()"
+        }).execute()
+        current_summary = "No hay un resumen previo. Comenzando sesión..."
+        current_followup = ""
+
+    # 2️⃣ **Generar un nuevo resumen con OpenAI**
+    prompt = f"""
+    Resumen actual de la terapia:
+    {current_summary}
+
+    Nueva conversación del usuario:
+    {conversation_text}
+
+    Genera un nuevo resumen combinando la información anterior con lo nuevo.
+    """
+    
+    response = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "system", "content": "Eres un terapeuta asistente."},
+                  {"role": "user", "content": prompt}]
+    )
+    
+    new_summary = response.choices[0].message.content
+
+    # **Evitar sobreescribir si el resumen es igual**
+    if current_summary.strip() == new_summary.strip():
+        print(f"✅ Resumen sin cambios para el usuario {user_id}, no se actualiza.")
+        return
+
+    # 3️⃣ **Detectar Follow-ups con OpenAI**
+    followup_prompt = f"""
+    Basado en esta conversación, detecta si hay temas importantes para hacer seguimiento en futuras sesiones.
+    
+    Conversación del usuario:
+    {conversation_text}
+
+    Temas de seguimiento previos:
+    {current_followup}
+
+    Si hay algún tema relevante que deba ser recordado para la próxima conversación, responde con una frase corta en formato:
+    "[tema importante]"
+
+    Si no hay nada importante, responde con "No hay follow-up".
+    """
+    
+    followup_response = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "system", "content": "Eres un terapeuta asistente."},
+                  {"role": "user", "content": followup_prompt}]
+    )
+
+    followup_text = followup_response.choices[0].message.content.strip()
+
+
+    # Si OpenAI dice "No hay follow-up", dejar vacío
+    if "No hay follow-up" in followup_text:
+        followup_text = ""
+
+    # 4️⃣ **Guardar el resumen y el Follow-up en Supabase**
+    supabase.table("therapy_summaries").upsert({
+        "user_id": user_id,
+        "summary": new_summary,
+        "followup": followup_text,
+        "updated_at": "now()"
+    }).execute()
+
+    # Limpiar la memoria temporal del usuario
+    short_term_memory[user_id] = []
+    print(f"✅ Resumen y follow-ups actualizados para el usuario {user_id}")
+
+
 
 @app.route('/actualizar_suscripcion', methods=['POST'])
 def actualizar_suscripcion():
