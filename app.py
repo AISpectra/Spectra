@@ -804,12 +804,25 @@ def update_therapy_summary(user_id):
         current_followup = response.data[0]["followup"] or ""  # Si no hay followup previo, inicializar vacío
     else:
         # 🆕 **Si el usuario no tiene un resumen previo, lo creamos**
-        supabase.table("therapy_summaries").upsert({
-            "user_id": user_id,
-            "summary": "No hay un resumen previo. Comenzando sesión...",
-            "followup": "",
-            "updated_at": "now()"
-        }, on_conflict=["user_id"]).execute()
+        # Verificar si el usuario ya tiene un registro en la tabla
+        existing_entry = supabase.table("therapy_summaries").select("user_id").eq("user_id", user_id).execute()
+
+        if existing_entry.data:
+            # Si existe, actualizamos el resumen y el follow-up
+            supabase.table("therapy_summaries").update({
+                "summary": "No hay un resumen previo. Comenzando sesión...",
+                "followup": "",
+                "updated_at": "now()"
+            }).eq("user_id", user_id).execute()
+        else:
+            # Si no existe, lo insertamos
+            supabase.table("therapy_summaries").insert({
+                "user_id": user_id,
+                "summary": "No hay un resumen previo. Comenzando sesión...",
+                "followup": "",
+                "updated_at": "now()"
+            }).execute()
+
 
         current_summary = "No hay un resumen previo. Comenzando sesión..."
         current_followup = ""
