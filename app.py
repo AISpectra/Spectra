@@ -804,12 +804,13 @@ def update_therapy_summary(user_id):
         current_followup = response.data[0]["followup"] or ""  # Si no hay followup previo, inicializar vacío
     else:
         # 🆕 **Si el usuario no tiene un resumen previo, lo creamos**
-        supabase.table("therapy_summaries").insert({
+        supabase.table("therapy_summaries").upsert({
             "user_id": user_id,
             "summary": "No hay un resumen previo. Comenzando sesión...",
             "followup": "",
             "updated_at": "now()"
-        }).execute()
+        }, on_conflict=["user_id"]).execute()
+
         current_summary = "No hay un resumen previo. Comenzando sesión..."
         current_followup = ""
 
