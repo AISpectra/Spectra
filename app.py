@@ -731,8 +731,7 @@ def chat():
                     return jsonify({"response": "Has alcanzado el límite de 10 mensajes diarios. Actualiza tu plan para continuar."})
 
             # Construir contexto con memoria a corto plazo
-            messages = [
-                {
+            messages.append({
                     "role": "system",
                     "content": (
                         "Eres Spectra, una inteligencia artificial diseñada para brindar apoyo emocional. " 
@@ -743,8 +742,8 @@ def chat():
                         "Formula preguntas abiertas (solo una pregunta por cada mensaje) para fomentar la reflexión. "
                         "Antes de finalizar la conversación, realiza una breve síntesis de la conversación y sugiere un ejercicio de autoayuda."
                     )
-                }
-            ]
+                
+            })
 
 
             if user_id not in short_term_memory:
