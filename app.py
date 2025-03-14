@@ -807,13 +807,20 @@ def update_therapy_summary(user_id):
 
     # 2️⃣ **Generar un nuevo resumen con OpenAI**
     prompt = f"""
-    Resumen anterior de la terapia:
+    Eres un asistente terapéutico que mantiene un resumen conciso y relevante de la terapia de un usuario.
+    El resumen debe ser breve y claro, solo conservando información importante y eliminando lo que no sea relevante.
+
+    - Si el usuario repite ideas, fusiónalas en una sola.
+    - Si hay detalles innecesarios o triviales, elimínalos.
+    - Mantén solo los puntos clave que realmente importan para futuras sesiones.
+
+    Aquí está el resumen anterior:
     {current_summary}
 
     Nueva conversación del usuario:
     {conversation_text}
 
-    Genera un nuevo resumen combinando la información anterior con lo nuevo.
+    Ahora, reescribe un **nuevo resumen** que mantenga la información esencial sin hacerlo más largo de lo necesario.
     """
 
     response = openai.chat.completions.create(
