@@ -854,7 +854,9 @@ def update_therapy_summary(user_id):
         followup_text = ""
 
     # 4️⃣ **Actualizar o insertar el resumen y follow-up en Supabase**
-    if response.data:
+  existing_entry = supabase.table("therapy_summaries").select("summary", "followup").eq("user_id", user_id).execute()
+
+    if existing_entry.data:
         # Si ya existe, lo actualizamos
         supabase.table("therapy_summaries").update({
             "summary": new_summary,
