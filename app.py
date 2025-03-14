@@ -801,35 +801,14 @@ def update_therapy_summary(user_id):
 
     if response.data:
         current_summary = response.data[0]["summary"]
-        current_followup = response.data[0]["followup"] or ""  # Si no hay followup previo, inicializar vacío
+        current_followup = response.data[0]["followup"] or ""  # Si no hay follow-up previo, inicializar vacío
     else:
-        # 🆕 **Si el usuario no tiene un resumen previo, lo creamos**
-        # Verificar si el usuario ya tiene un registro en la tabla
-        existing_entry = supabase.table("therapy_summaries").select("user_id").eq("user_id", user_id).execute()
-
-        if existing_entry.data:
-            # Si existe, actualizamos el resumen y el follow-up
-            supabase.table("therapy_summaries").update({
-                "summary": "No hay un resumen previo. Comenzando sesión...",
-                "followup": "",
-                "updated_at": "now()"
-            }).eq("user_id", user_id).execute()
-        else:
-            # Si no existe, lo insertamos
-            supabase.table("therapy_summaries").insert({
-                "user_id": user_id,
-                "summary": "No hay un resumen previo. Comenzando sesión...",
-                "followup": "",
-                "updated_at": "now()"
-            }).execute()
-
-
-        current_summary = "No hay un resumen previo. Comenzando sesión..."
+        current_summary = ""
         current_followup = ""
 
     # 2️⃣ **Generar un nuevo resumen con OpenAI**
     prompt = f"""
-    Resumen actual de la terapia:
+    Resumen anterior de la terapia:
     {current_summary}
 
     Nueva conversación del usuario:
@@ -837,19 +816,14 @@ def update_therapy_summary(user_id):
 
     Genera un nuevo resumen combinando la información anterior con lo nuevo.
     """
-    
+
     response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": "Eres un terapeuta asistente."},
                   {"role": "user", "content": prompt}]
     )
-    
-    new_summary = response.choices[0].message.content
 
-    # **Evitar sobreescribir si el resumen es igual**
-    if current_summary.strip() == new_summary.strip():
-        print(f"✅ Resumen sin cambios para el usuario {user_id}, no se actualiza.")
-        return
+    new_summary = response.choices[0].message.content
 
     # 3️⃣ **Detectar Follow-ups con OpenAI**
     followup_prompt = f"""
@@ -866,7 +840,7 @@ def update_therapy_summary(user_id):
 
     Si no hay nada importante, responde con "No hay follow-up".
     """
-    
+
     followup_response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": "Eres un terapeuta asistente."},
@@ -875,24 +849,30 @@ def update_therapy_summary(user_id):
 
     followup_text = followup_response.choices[0].message.content.strip()
 
-
     # Si OpenAI dice "No hay follow-up", dejar vacío
     if "No hay follow-up" in followup_text:
         followup_text = ""
 
-    # 4️⃣ **Guardar el resumen y el Follow-up en Supabase**
-    supabase.table("therapy_summaries").upsert({
-        "user_id": user_id,
-        "summary": new_summary,
-        "followup": followup_text,
-        "updated_at": "now()"
-    }).execute()
+    # 4️⃣ **Actualizar o insertar el resumen y follow-up en Supabase**
+    if response.data:
+        # Si ya existe, lo actualizamos
+        supabase.table("therapy_summaries").update({
+            "summary": new_summary,
+            "followup": followup_text,
+            "updated_at": "now()"
+        }).eq("user_id", user_id).execute()
+    else:
+        # Si no existe, lo insertamos
+        supabase.table("therapy_summaries").insert({
+            "user_id": user_id,
+            "summary": new_summary,
+            "followup": followup_text,
+            "updated_at": "now()"
+        }).execute()
 
     # Limpiar la memoria temporal del usuario
     short_term_memory[user_id] = []
     print(f"✅ Resumen y follow-ups actualizados para el usuario {user_id}")
-
-
 
 @app.route('/actualizar_suscripcion', methods=['POST'])
 def actualizar_suscripcion():
