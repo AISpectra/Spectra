@@ -265,6 +265,71 @@
         <input type="text" id="user-input" placeholder="Escribe tu mensaje..." required>
         <button type="submit"id="sendButton">Enviar</button>
     </form>
+
+
+
+    <!-- Contenedor de botones debajo del input -->
+    <div class="button-container" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+        <!-- Botón "Terminar sesión" en rojo -->
+        <button id="end-session-btn" style="background: #00c6ff; color: white; padding: 12px 20px; font-size: 16px; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.3s ease;">
+            Terminar sesión
+        </button>
+
+        <!-- Botón "Borrar historial" con confirmación -->
+        <div style="position: relative;">
+            <button id="clear-history-btn" style="background: #ff4d4d; color: white; padding: 12px 20px; font-size: 16px; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.3s ease;">
+              Borrar historial
+            </button>
+            <div id="confirm-clear" style="display: none; position: absolute; top: 45px; left: 0; background: white; border: 1px solid gray; padding: 5px; border-radius: 5px;">
+                <p style="margin: 0;">¿Estás seguro?</p>
+                <button id="confirm-clear-btn" style="background: #ff4d4d; color: white; padding: 5px 10px; border-radius: 5px; border: none; cursor: pointer;">Sí</button>
+                <button id="cancel-clear-btn" style="background: gray; color: white; padding: 5px 10px; border-radius: 5px; border: none; cursor: pointer;">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById("end-session-btn").addEventListener("click", function() {
+        fetch("/end_session", { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();  // Recarga la página para iniciar una nueva conversación
+            })
+            .catch(error => console.error("Error:", error));
+    });
+    
+    // Manejar el botón de borrar historial
+    const clearHistoryBtn = document.getElementById("clear-history-btn");
+    const confirmBox = document.getElementById("confirm-clear");
+    const confirmClearBtn = document.getElementById("confirm-clear-btn");
+    const cancelClearBtn = document.getElementById("cancel-clear-btn");
+    
+    // Mostrar la confirmación al hacer clic en el botón de borrar historial
+    clearHistoryBtn.addEventListener("click", function() {
+        confirmBox.style.display = "block";
+    });
+    
+    // Confirmar la eliminación del historial
+    confirmClearBtn.addEventListener("click", function() {
+        fetch("/clear_history", { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();  // Recarga la página para limpiar el chat
+            })
+            .catch(error => console.error("Error:", error));
+    });
+    
+    // Cancelar la eliminación del historial
+    cancelClearBtn.addEventListener("click", function() {
+        confirmBox.style.display = "none";
+    });
+    </script>
+
+
+
+
     <div class="button-container">
         <button id="toggle-continuous">🔄</button>
         <!-- Este botón activará y desactivará el micrófono -->

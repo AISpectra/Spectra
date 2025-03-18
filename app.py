@@ -972,15 +972,21 @@ def end_session():
     update_therapy_summary(user_id)  # Genera el resumen y follow-up
     short_term_memory[user_id] = []  # Limpia la memoria temporal
 
-    return jsonify({"message": "Sesión terminada. Se ha guardado el resumen y el follow-up."})
+    return jsonify({"message": "Sesión terminada."})
 
 @app.route('/clear_history', methods=['POST'])
 @login_required
 def clear_history():
     user_id = current_user.id
-    short_term_memory[user_id] = []  # Borra historial de la sesión actual
 
-    return jsonify({"message": "Historial borrado. Puedes empezar de nuevo."})
+    # Borrar memoria a corto plazo
+    short_term_memory[user_id] = []
+
+    # Borrar resumen y follow-up en Supabase
+    supabase.table("therapy_summaries").delete().eq("user_id", user_id).execute()
+
+    return jsonify({"message": "Historial eliminado."})
+
 
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
