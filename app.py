@@ -229,8 +229,8 @@ def generar_weekly_letter():
 
     # Pedir a OpenAI que genere contenido
     prompt = (
-        "Genera un artículo breve sobre bienestar emocional para una newsletter semanal. "
-        "Debe incluir: (1) Un título atractivo, (2) Un subtítulo opcional, (3) Un contenido breve y útil. "
+        "Genera un artículo extenso sobre bienestar emocional para una newsletter semanal. "
+        "Debe incluir: (1) Un título atractivo, (2) Un subtítulo opcional, (3) Un contenido entretenido y útil. "
         "El tema debe ser relevante para el bienestar mental. "
         "Formato de respuesta:\n"
         "Título: [Aquí va el título]\n"
