@@ -583,11 +583,6 @@ def login():
 def logout():
     user_id = current_user.id
 
-    # Si el usuario tiene una conversación activa, actualizar el resumen antes de cerrar sesión
-    if user_id in conversation_timers:
-        conversation_timers[user_id].cancel()  # Cancelamos el temporizador en caso de que siga activo
-        update_therapy_summary(user_id)  # Guardamos el resumen inmediatamente
-    
     logout_user()
     return redirect(url_for('login'))
 
@@ -704,14 +699,6 @@ def chat():
         try:
             user_input = request.json['message']
             user_id = current_user.id
-
-            # Si ya hay un temporizador corriendo, cancelarlo antes de iniciar uno nuevo
-            if user_id in conversation_timers:
-                conversation_timers[user_id].cancel()
-
-            # Iniciar un nuevo temporizador de 10 minutos para actualizar el resumen de terapia
-            conversation_timers[user_id] = Timer(600, update_therapy_summary, [user_id])
-            conversation_timers[user_id].start()
 
             # Inicializar memoria a corto plazo si no existe
             if user_id not in short_term_memory:
@@ -977,6 +964,24 @@ def format_weekly(text):
     text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
 
     return Markup(text)
+
+@app.route('/end_session', methods=['POST'])
+@login_required
+def end_session():
+    user_id = current_user.id
+    update_therapy_summary(user_id)  # Genera el resumen y follow-up
+    short_term_memory[user_id] = []  # Limpia la memoria temporal
+
+    return jsonify({"message": "Sesión terminada. Se ha guardado el resumen y el follow-up."})
+
+@app.route('/clear_history', methods=['POST'])
+@login_required
+def clear_history():
+    user_id = current_user.id
+    short_term_memory[user_id] = []  # Borra historial de la sesión actual
+
+    return jsonify({"message": "Historial borrado. Puedes empezar de nuevo."})
+
 
 # Obtener la clave de API de OpenAI desde las variables de entorno
 openai.api_key = os.getenv("OPENAI_API_KEY")
