@@ -241,20 +241,16 @@
             const script = [
                 { text: "Bienvenido a esta sesión de respiración guiada. Encuentra un lugar cómodo, sientate y relaja los hombros", duration: 6000 },
                 { text: "Cuando estés listo sigue el ritmo de la bola para respirar conscientemente", duration: 5000 },
-                { text: "Inhala lenta y profundamente por la nariz... siente cómo el aire llena tus pulmones", duration: 4000, action: 'inhale' },
-                { text: "Sostén la respiración... disfruta de la calma que fluye en tu cuerpo", duration: 4000, action: 'hold' },
-                { text: "Suelta el aire lentamente por la boca… liberando cualquier tensión o estrés", duration: 6000, action: 'exhale' },
-                { text: "Siente el efecto de esta respiración antes de continuar", duration: 4000 },
-                { text: "Lleva el aire hacia tu abdomen, permitiendo que tu cuerpo se llene de energía", duration: 4000, action: 'inhale' },
-                { text: "Siente la tranquilidad en este momento de pausa", duration: 4000, action: 'hold' },
-                { text: "Suelta el aire despacio, dejando ir cualquier preocupación", duration: 6000, action: 'exhale' },
-                { text: "Nota cómo tu cuerpo se vuelve más ligero con cada respiración", duration: 4000 },
-                { text: "Siente cómo el aire te llena de calma y claridad", duration: 4000, action: 'inhale' },
-                { text: "Abraza la sensación de paz en tu interior", duration: 4000, action: 'hold' },
-                { text: "Libera la tensión y suelta lo que ya no necesitas", duration: 6000, action: 'exhale' },
-                { text: "Observa cómo te sientes ahora, más presente y relajado", duration: 4000 },
-                { text: "Inhala una vez más, llenando tu cuerpo de energía positiva", duration: 4000, action: 'inhale' },
-                { text: "Deja que la calma se expanda en ti", duration: 6000, action: 'exhale' },
+                { text: "Inhala lenta por la nariz ", duration: 4000, action: 'inhale' },
+                { text: "Suelta el aire lentamente por la boca", duration: 6000, action: 'exhale' },
+                { text: "Inhala de nuevo 4 segundos", duration: 4000, action: 'inhale' },
+                { text: "Y mante el aire en tus pulmones", duration: 4000, action: 'hold' },
+                { text: "Suelta el aire despacio", duration: 6000, action: 'exhale' },
+                { text: "Coge por la nariz", duration: 4000, action: 'inhale' },
+                { text: "Suelta el aire por la boca", duration: 6000, action: 'exhale' },
+                { text: "Inhala una vez más", duration: 4000, action: 'inhale' },
+                { text: "Manten el aire 4 segundos", duration: 4000 },
+                { text: "Y dejalo salir", duration: 6000, action: 'exhale' },
                 { text: "Cuando estés listo, levantate y sigue tu día con tranquilidad y claridad", duration: 6000 },
             ];
 
@@ -296,7 +292,11 @@
                 isPaused = !isPaused;
                 if (!isPaused) {
                     voiceGuide.play();  // ✅ Solo reproduce si estaba en pausa
-                    backgroundMusic.play();
+                    backgroundMusic.pause();
+                    if (isVoiceEnabled) {
+                       voiceGuide.play();
+                       backgroundMusic.play();
+                    }
                     updateText();
                     pauseButton.innerText = "⏸";
                 } else {
@@ -325,11 +325,12 @@
                 isPaused = false;
                 voiceGuide.pause();
                 voiceGuide.currentTime = 0;
-                backgroundMusic.play();
+                backgroundMusic.pause();
                 pauseButton.innerText = "⏸";
                 updateText();
                 if (isVoiceEnabled) {
                     voiceGuide.play();
+                    backgroundMusic.play();
                 }
             }
 
